@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% include 'navbar_guest.html' %} 
+<div class="container mt-4">
+    <div class="card bg-dark text-white">
+        <div class="card-header">
+            <h1>{{ song.title }}</h1>
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">{{ song.artist }}</h5>
+            <p class="card-text"><strong>Genres:</strong>
+                {% for genre in song.genres %}
+                    <span class="badge bg-secondary">{{ genre }}</span>
+                {% endfor %}
+            </p>
+            <p class="card-text"><strong>Songwriters:</strong>
+                {% for songwriter in song.songwriters %}
+                    <span>{{ songwriter }}</span>{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </p>
+            <p class="card-text"><strong>Duration:</strong> {{ song.duration }} minutes</p>
+            <p class="card-text"><strong>Release Date:</strong> {{ song.release_date }}</p>
+            <p class="card-text"><strong>Year:</strong> {{ song.year }}</p>
+            <p class="card-text"><strong>Album:</strong> {{ song.album }}</p>
+            <p class="card-text"><strong>Total Plays:</strong> {{ song.total_plays }}</p>
+            <p class="card-text"><strong>Total Downloads:</strong> {{ song.total_downloads }}</p>
+
+            <input type="range" id="songProgress" name="songProgress" class="form-range" min="0" max="100" value="0">
+            <button onclick="checkProgress()" class="btn btn-primary mt-2">Play</button>
+
+            <form method="POST" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-info mt-2">Add to Playlist</button>
+            </form>
+
+            {% if user_is_premium %}
+                <form method="POST" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success mt-2">Download</button>
+                </form>
+            {% endif %}
+        </div>
+        <div class="card-footer text-muted">
+            <aclass="btn btn-outline-light">Back</a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

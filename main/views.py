@@ -15,7 +15,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 
-from playlist.models import UserPlaylist
+from playlist.models import Song, UserPlaylist
 
 
 def show_json_by_id(request, id):
@@ -136,6 +136,51 @@ def add_product_ajax(request):
 
     return HttpResponseNotFound()
 
+def play_song(request):
+    song_data = {
+        'title': 'Blinding Lights',
+        'genres': ['Pop', 'Synthwave'],
+        'artist': 'The Weeknd',
+        'songwriters': ['Abel Tesfaye', 'Ahmad Balshe', 'Jason Quenneville', 'Max Martin', 'Oscar Holter'],
+        'duration': 3.22,  
+        'release_date': '29/11/2019',
+        'year': 2019,
+        'album': 'After Hours',
+        'total_plays': 2_700_000_000,  
+        'total_downloads': 1_000_000  
+    }
+
+    return render(request, 'play_song.html', {'song': song_data, 'user': request.user, 'user_is_premium': True})
+
+
+@login_required
+def play_user_playlist(request):
+    songs_data = [
+        {'id': 1, 'title': 'Shape of You', 'artist': 'Ed Sheeran', 'duration': '3 minutes 53 seconds', 'play_count': 0},
+        {'id': 2, 'title': 'Blinding Lights', 'artist': 'The Weeknd', 'duration': '3 minutes 20 seconds', 'play_count': 0},
+        {'id': 3, 'title': 'Rolling in the Deep', 'artist': 'Adele', 'duration': '3 minutes 48 seconds', 'play_count': 0},
+        {'id': 4, 'title': 'Bad Guy', 'artist': 'Billie Eilish', 'duration': '3 minutes 14 seconds', 'play_count': 0},
+        {'id': 5, 'title': 'Thriller', 'artist': 'Michael Jackson', 'duration': '5 minutes 57 seconds', 'play_count': 0}
+    ]
+
+    
+    total_seconds = sum(int(song['duration'].split()[0]) * 60 + int(song['duration'].split()[2]) for song in songs_data)
+    total_hours = total_seconds // 3600
+    total_minutes = (total_seconds % 3600) // 60
+
+    playlist_data = {
+        'id': 101,
+        'title': 'basdut',
+        'creator': 'Lisan Al gaib',
+        'songs': songs_data,
+        'total_duration_hours': total_hours,
+        'total_duration_minutes': total_minutes,
+        'created_date': '2024-03-18',
+        'description': 'A playlist featuring some of the biggest hits from various artists across genres.'
+    }
+
+
+    return render(request, 'play_user_playlist.html', {'playlist': playlist_data})
 
 def search(request):
     query = request.GET.get('query')
