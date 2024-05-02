@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <div class="container my-5">
+        <h2 class="mb-4">Dashboard</h2>
+        <div class="form-box">
+            <div class="mb-3">
+                <label class="form-label">Nama:</label>
+                <p>{{ user.name }}</p>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Email:</label>
+                <p>{{ user.email }}</p>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Kota Asal:</label>
+                <p>{{ user.city }}</p>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Gender:</label>
+                <p>{{ user.gender }}</p>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Tempat Lahir:</label>
+                <p>{{ user.birth_place }}</p>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Tanggal Lahir:</label>
+                <p>{{ user.birth_date }}</p>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Role:</label>
+                <p>{{ user.role }}</p>
+            </div>
+
+            <h4 class="mb-3">Daftar Playlist</h4>
+            {% if user.playlists %}
+                <table class="table table-dark">
+                    <thead>
+                        <tr>
+                            <th>Judul</th>
+                            <th>Jumlah Lagu</th>
+                            <th>Tanggal Dibuat</th>
+                            <th>Total Durasi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for playlist in user.playlists %}
+                            <tr>
+                                <td>{{ playlist.name }}</td>
+                                <td>{{ playlist.song_count }}</td>
+                                <td>{{ playlist.created_at }}</td>
+                                <td>{{ playlist.total_duration }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>Belum Memiliki Playlist</p>
+            {% endif %}
+        </div>
+    </div>
+
+
+{% endblock %}
+

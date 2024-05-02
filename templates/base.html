@@ -48,11 +48,8 @@
     </style>
 </head>
 <body>
-    {% if user.is_authenticated %}
-        {% include 'navbar_user.html' %}
-    {% else %}
-        {% include 'navbar_guest.html' %}
-    {% endif %}
+    {% include 'navbar_user.html' %}
+    
 
     <div class="container mt-4">
         {% block content %}{% endblock %}
