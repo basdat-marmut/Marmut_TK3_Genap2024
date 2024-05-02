@@ -8,6 +8,9 @@ def view_royalties(request):
 def manage_song(request):
     return render(request, 'manage_song.html')
 
+def manage_song_label(request):
+    return render(request, 'manage_song_label.html')
+
 def create_album(request):
     if request.method == 'POST':
         form = AlbumForm(request.POST)
