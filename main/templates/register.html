@@ -1,25 +1,15 @@
 {% extends 'base.html' %}
 
 {% block content %}
-{% include 'navbar_guest.html' %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="form-box">
-                <h2 class="mb-3">Register</h2>
-                <form method="post">
-                    {% csrf_token %}
-                    {{ form.as_p }} <!-- This will automatically handle field rendering -->
-                    <button type="submit" class="btn btn-pink">Register</button>
-                </form>
-                {% if form.errors %}
-                    {% for field in form %}
-                        {% for error in field.errors %}
-                            <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                    {% endfor %}
-                {% endif %}
-            </div>
+<div class="container mt-5 d-flex justify-content-center">
+    <div class="form-box text-center" style="width: 50%; padding: 30px;">
+        <h2>Register</h2>
+        <p>Select your registration type:</p>
+        <div class="btn-group-vertical" role="group" aria-label="Registration Type">
+            <!-- Button for Pengguna with cyan color -->
+            <button type="button" class="btn btn-cyan btn-lg mb-3" style="padding: 10px 20px;" onclick="window.location.href='{% url "main:register_user" %}'">Pengguna</button>
+            <!-- Button for Label with pink color -->
+            <button type="button" class="btn btn-pink btn-lg" style="padding: 10px 20px;" onclick="window.location.href='{% url "main:register_label" %}'">Label</button>
         </div>
     </div>
 </div>

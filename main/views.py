@@ -1,8 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponseNotFound, HttpResponseRedirect
-from main.forms import ProductForm
 from django.urls import reverse
-from main.models import Product
 from django.http import HttpResponse
 from django.core import serializers
 from django.shortcuts import redirect
@@ -14,65 +12,87 @@ import datetime
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
-
 from playlist.models import Song, UserPlaylist
+from django.shortcuts import render, redirect
+from django.contrib.auth.models import User
+from django.contrib.auth import login
+from .models import UserProfile, LabelProfile
+from django.contrib.auth.hashers import make_password
 
+from django.contrib.auth.models import User
 
-def show_json_by_id(request, id):
-    data = Product.objects.filter(pk=id)
-    return HttpResponse(serializers.serialize("json", data), content_type="application/json")
+def get_user_type(user):
+    try:
+        user_profile = user.userprofile
+        if user_profile.is_artist:
+            return 'artist'
+        elif user_profile.is_songwriter:
+            return 'songwriter'
+        elif user_profile.is_podcaster:
+            return 'podcaster'
+        else:
+            return 'user'
+    except UserProfile.DoesNotExist:
+        try:
+            label_profile = user.labelprofile
+            return 'label'
+        except LabelProfile.DoesNotExist:
+            return 'guest'
 
-def show_xml_by_id(request, id):
-    data = Product.objects.filter(pk=id)
-    return HttpResponse(serializers.serialize("xml", data), content_type="application/xml")
-
-def show_json(request):
-    data = Product.objects.all()
-    return HttpResponse(serializers.serialize("json", data), content_type="application/json")
-
-def show_xml(request):
-    data = Product.objects.all()
-    return HttpResponse(serializers.serialize("xml", data), content_type="application/xml")
-
-@login_required(login_url='/login')
 def show_main(request):
-    products = Product.objects.filter(user=request.user)
-    last_login = request.COOKIES.get('last_login', 'Your first login')  # Provides a default if 'last_login' isn't set
+    return redirect('main:login_and_register')
 
-    context = {
-        'name': request.user.username,
-        'class': 'PBP A',
-        'products': products,
-        'last_login': last_login,  # Use the safe variable here
-    }
 
-    return render(request, "main.html", context)
+def register_user(request):
+    if request.method == 'POST':
+        username = request.POST.get('email')
+        password = make_password(request.POST.get('password'))
+        user = User.objects.create(username=username, email=username, password=password)
+        
+        birth_date = request.POST.get('birthdate')
+        city = request.POST.get('city')
+        is_artist = 'Artist' in request.POST.get('role', [])
+        is_songwriter = 'Songwriter' in request.POST.get('role', [])
+        is_podcaster = 'Podcaster' in request.POST.get('role', [])
+        
+        UserProfile.objects.create(
+            user=user,
+            birth_date=birth_date,
+            city=city,
+            is_artist=is_artist,
+            is_songwriter=is_songwriter,
+            is_podcaster=is_podcaster
+        )
+        
+        login(request, user)  # Automatically log in the new user
+        return redirect('main:home')  # Redirect to a home or profile page
 
-def create_product(request):
-    form = ProductForm(request.POST or None)
+    return render(request, 'register_user.html')
 
-    if form.is_valid() and request.method == "POST":
-        product = form.save(commit=False)
-        product.user = request.user
-        product.save()
-        return HttpResponseRedirect(reverse('main:show_main'))
+def register_label(request):
+    if request.method == 'POST':
+        username = request.POST.get('email')
+        password = make_password(request.POST.get('password'))
+        user = User.objects.create(username=username, email=username, password=password)
+        
+        contact = request.POST.get('contact')
+        
+        LabelProfile.objects.create(
+            user=user,
+            contact=contact
+        )
+        
+        login(request, user)  # Automatically log in the new user
+        return redirect('main:home')  # Redirect to a home or profile page
 
-    context = {'form': form}
-    return render(request, "create_product.html", context)
+    return render(request, 'register_label.html')
 
 def register(request):
-    form = UserCreationForm()
+    # Simply render the choice page without any logic for POST methods
+    return render(request, 'register.html')
 
-    if request.method == "POST":
-        print("debug3")
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            print("debug4")
-            form.save()
-            messages.success(request, 'Your account has been successfully created!')
-            return redirect('main:login')
-    context = {'form':form}
-    return render(request, 'register.html', context)
+def login_and_register(request):
+    return render(request, 'login_and_register.html')
 
 def login_user(request):
     if request.method == 'POST':
@@ -94,47 +114,6 @@ def logout_user(request):
     response.delete_cookie('last_login')
     return response
 
-def edit_product(request, id):
-    # Get product berdasarkan ID
-    product = Product.objects.get(pk = id)
-
-    # Set product sebagai instance dari form
-    form = ProductForm(request.POST or None, instance=product)
-
-    if form.is_valid() and request.method == "POST":
-        # Simpan form dan kembali ke halaman awal
-        form.save()
-        return HttpResponseRedirect(reverse('main:show_main'))
-
-    context = {'form': form}
-    return render(request, "edit_product.html", context)
-
-def delete_product(request, id):
-    # Get data berdasarkan ID
-    product = Product.objects.get(pk = id)
-    # Hapus data
-    product.delete()
-    # Kembali ke halaman awal
-    return HttpResponseRedirect(reverse('main:show_main'))
-
-def get_product_json(request):
-    product_item = Product.objects.all()
-    return HttpResponse(serializers.serialize('json', product_item))
-
-@csrf_exempt
-def add_product_ajax(request):
-    if request.method == 'POST':
-        name = request.POST.get("name")
-        price = request.POST.get("price")
-        description = request.POST.get("description")
-        user = request.user
-
-        new_product = Product(name=name, price=price, description=description, user=user)
-        new_product.save()
-
-        return HttpResponse(b"CREATED", status=201)
-
-    return HttpResponseNotFound()
 
 def play_song(request):
     song_data = {
@@ -153,7 +132,6 @@ def play_song(request):
     return render(request, 'play_song.html', {'song': song_data, 'user': request.user, 'user_is_premium': True})
 
 
-@login_required
 def play_user_playlist(request):
     songs_data = [
         {'id': 1, 'title': 'Shape of You', 'artist': 'Ed Sheeran', 'duration': '3 minutes 53 seconds', 'play_count': 0},
@@ -253,3 +231,47 @@ def yearly(request):
 
 def podetail(request):
     return render(request, "podcastdetail.html")
+def home(request):
+    #redirect to login and register
+    return redirect('main:login_and_register')
+
+from django.shortcuts import render
+from datetime import datetime, timedelta
+
+def dashboard(request):
+    # Dummy data untuk pengguna
+    user = {
+        'name': 'John Doe',
+        'email': 'john@example.com',
+        'city': 'New York',
+        'gender': 'Male',
+        'birth_place': 'Los Angeles',
+        'birth_date': '1990-05-15',
+        'role': 'Regular User',
+        'playlists': [
+            {
+                'name': 'Favorite Songs',
+                'song_count': 10,
+                'created_at': '2023-04-01',
+                'total_duration': '1:25:30'
+            },
+            {
+                'name': 'Workout Playlist',
+                'song_count': 15,
+                'created_at': '2022-12-15',
+                'total_duration': '2:10:45'
+            },
+            {
+                'name': 'Chill Vibes',
+                'song_count': 8,
+                'created_at': '2023-03-20',
+                'total_duration': '1:18:12'
+            },
+        ],
+    }
+
+    context = {
+        'user': user,
+        'user_type': 'user',
+    }
+    return render(request, 'dashboard.html', context)
