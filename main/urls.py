@@ -1,6 +1,6 @@
 from django.urls import path
 from main.views import show_main
-from main.views import show_main, create_product, show_xml, show_json, show_xml_by_id, show_json_by_id 
+from main.views import show_main, create_product, show_xml, show_json, show_xml_by_id, show_json_by_id, play_song, play_user_playlist
 from main.views import register 
 from main.views import login_user
 from main.views import logout_user
@@ -24,5 +24,7 @@ urlpatterns = [
     path('edit-product/<int:id>', edit_product, name='edit_product'),
     path('delete/<int:id>', delete_product, name='delete_product'),
     path('get-product/', get_product_json, name='get_product_json'),
-    path('create-product-ajax/', add_product_ajax, name='add_product_ajax')
+    path('create-product-ajax/', add_product_ajax, name='add_product_ajax'),
+    path('play-song/', play_song, name='play_song'),
+    path('play-user-playlist/', play_user_playlist, name='play_user_playlist'),
 ]
