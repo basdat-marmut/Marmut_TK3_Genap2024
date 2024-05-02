@@ -15,6 +15,8 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 
+from playlist.models import UserPlaylist
+
 
 def show_json_by_id(request, id):
     data = Product.objects.filter(pk=id)
@@ -135,3 +137,41 @@ def add_product_ajax(request):
     return HttpResponseNotFound()
 
 
+def search(request):
+    query = request.GET.get('query')
+    
+    if query:
+        songs = Song.objects.filter(title__icontains=query)
+        podcasts = podcast.objects.filter(title__icontains=query)
+        user_playlists = UserPlaylist.objects.filter(title__icontains=query)
+        
+        results = []
+        for song in songs:
+            results.append({
+                'type': 'SONG',
+                'title': song.title,
+                'by': song.artist,
+                'url': reverse('song_detail', args=[song.id])
+            })
+        for podcast in podcasts:
+            results.append({
+                'type': 'PODCAST',
+                'title': podcast.title,
+                'by': podcast.podcaster,
+                'url': reverse('podcast_detail', args=[podcast.id])
+            })
+        for playlist in user_playlists:
+            results.append({
+                'type': 'USER PLAYLIST',
+                'title': playlist.title,
+                'by': playlist.user.username,
+                'url': reverse('playlist_detail', args=[playlist.id])
+            })
+    else:
+        results = []
+    
+    context = {
+        'query': query,
+        'results': results
+    }
+    return render(request, 'main/search_results.html', context)

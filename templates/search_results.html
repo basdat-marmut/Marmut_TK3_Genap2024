@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Hasil Pencarian "{{ query }}"</h2>
+
+{% if results %}
+    <table class="table table-dark">
+        <thead>
+            <tr>
+                <th>Tipe</th>
+                <th>Judul</th>
+                <th>Oleh</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in results %}
+                <tr>
+                    <td>{{ result.type }}</td>
+                    <td>{{ result.title }}</td>
+                    <td>{{ result.by }}</td>
+                    <td>
+                        <a href="{{ result.url }}" class="btn btn-sm btn-info">Lihat</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>Maaf, pencarian untuk "{{ query }}" tidak ditemukan</p>
+{% endif %}
+{% endblock %}

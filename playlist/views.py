@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from .models import Playlist, Song, UserPlaylist
 from .forms import PlaylistForm, UserPlaylistForm
 
@@ -57,3 +58,42 @@ def remove_song_from_playlist(request, playlist_id, song_id):
     song = get_object_or_404(Song, id=song_id)
     UserPlaylist.objects.filter(playlist=playlist, song=song).delete()
     return redirect('playlist_detail', playlist_id=playlist_id)
+
+def search(request):
+    query = request.GET.get('query')
+    
+    if query:
+        songs = Song.objects.filter(title__icontains=query)
+        podcasts = podcast.objects.filter(title__icontains=query)
+        user_playlists = UserPlaylist.objects.filter(title__icontains=query)
+        
+        results = []
+        for song in songs:
+            results.append({
+                'type': 'SONG',
+                'title': song.title,
+                'by': song.artist,
+                'url': reverse('song_detail', args=[song.id])
+            })
+        for podcast in podcasts:
+            results.append({
+                'type': 'PODCAST',
+                'title': podcast.title,
+                'by': podcast.podcaster,
+                'url': reverse('podcast_detail', args=[podcast.id])
+            })
+        for playlist in user_playlists:
+            results.append({
+                'type': 'USER PLAYLIST',
+                'title': playlist.title,
+                'by': playlist.user.username,
+                'url': reverse('playlist_detail', args=[playlist.id])
+            })
+    else:
+        results = []
+    
+    context = {
+        'query': query,
+        'results': results
+    }
+    return render(request, 'main/search_results.html', context)
