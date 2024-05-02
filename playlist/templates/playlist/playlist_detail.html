@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1>User Playlist Detail</h1>
+    <p>Judul: {{ playlist.name }}</p>
+    <p>Pembuat: {{ playlist.user.username }}</p>
+    <p>Jumlah Lagu: {{ songs.count }}</p>
+    <p>Total Durasi: {{ playlist.total_duration }}</p>
+    <p>Tanggal Dibuat: {{ playlist.created_at|date:"d/m/y" }}</p>
+    <p>Deskripsi: {{ playlist.description }}</p>
+    <a href="#" class="btn btn-primary">Shuffle Play</a>
+    <a href="{% url 'playlist_list' %}" class="btn btn-secondary">Kembali</a>
+
+    <h2>Daftar Lagu</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Judul Lagu</th>
+                <th>Oleh</th>
+                <th>Durasi</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for song in songs %}
+                <tr>
+                    <td>{{ song.song.title }}</td>
+                    <td>{{ song.song.artist }}</td>
+                    <td>{{ song.song.duration }}</td>
+                    <td>
+                        <a href="#" class="btn btn-info btn-sm">Lihat</a>
+                        <a href="#" class="btn btn-success btn-sm">Play</a>
+                        <a href="{% url 'remove_song_from_playlist' playlist.id song.song.id %}" class="btn btn-danger btn-sm">Hapus</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'add_song_to_playlist' playlist.id %}" class="btn btn-primary">Tambah Lagu</a>
+</div>
+{% endblock %}
