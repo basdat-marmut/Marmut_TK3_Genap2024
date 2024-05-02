@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Albums and Songs</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Album Management</h1>
+    <!-- List Albums -->
+    <table>
+        <tr>
+            <th>Title</th>
+            <th>Total Songs</th>
+            <th>Total Duration</th>
+            <th>Actions</th>
+        </tr>
+        {% for album in albums %}
+        <tr>
+            <td>{{ album.title }}</td>
+            <td>{{ album.songs.count }}</td>
+            <td>{{ album.total_duration }}</td>
+            <td>
+                <a href="{% url 'view_album_label' album.id %}">View Songs</a>
+                <a href="{% url 'delete_album_label' album.id %}">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <!-- List Songs in an Album -->
+    <h2>Songs in Album: {{ current_album.title }}</h2>
+    <table>
+        <tr>
+            <th>Title</th>
+            <th>Duration</th>
+            <th>Total Plays</th>
+            <th>Total Downloads</th>
+            <th>Actions</th>
+        </tr>
+        {% for song in current_album.songs.all %}
+        <tr>
+            <td>{{ song.title }}</td>
+            <td>{{ song.duration }} minutes</td>
+            <td>{{ song.total_plays }}</td>
+            <td>{{ song.total_downloads }}</td>
+            <td>
+                <a href="{% url 'delete_song_label'
+                song.id %}">Delete</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+<td colspan="5">No songs found in this album.</td>
+        </tr>
+        {% endfor %}
+    </table>
+    </body>
+</html>

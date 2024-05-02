@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Songs and Albums</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Manage Albums and Songs</h1>
+
+    <!-- Create Album Form -->
+    <h2>Create Album</h2>
+    <form method="post" action="{% url 'create_album' %}">
+        {% csrf_token %}
+        <label for="title">Album Title:</label>
+        <input type="text" id="title" name="title"><br><br>
+
+        <label for="label">Label:</label>
+        <select id="label" name="label">
+            {% for label in labels %}
+            <option value="{{ label.id }}">{{ label.name }}</option>
+            {% endfor %}
+        </select><br><br>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <!-- List Albums -->
+    <h2>List of Albums</h2>
+    <table>
+        <tr>
+            <th>Title</th>
+            <th>Label</th>
+            <th>Total Songs</th>
+            <th>Total Duration</th>
+            <th>Action</th>
+        </tr>
+        {% for album in albums %}
+        <tr>
+            <td>{{ album.title }}</td>
+            <td>{{ album.label }}</td>
+            <td>{{ album.songs.count }}</td>
+            <td>{{ album.total_duration }}</td>
+            <td>
+                <a href="{% url 'view_album' album.id %}">View Songs</a>
+                <a href="{% url 'add_song_to_album' album.id %}">Add Song</a>
+                <a href="{% url 'delete_album' album.id %}">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <!-- Assuming you want to add songs to a specific album -->
+    <!-- Create Song Form -->
+    <h2>Create Song</h2>
+    <form method="post" action="{% url 'create_song' %}">
+        {% csrf_token %}
+        <input type="hidden" name="album_id" value="{{ album.id }}">
+        <label for="title">Song Title:</label>
+        <input type="text" id="title" name="title"><br><br>
+
+        <label for="duration">Duration (in minutes):</label>
+        <input type="number" id="duration" name="duration"><br><br>
+
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>

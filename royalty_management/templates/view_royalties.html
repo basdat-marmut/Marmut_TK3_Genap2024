@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Royalty Check</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Check Royalties</h1>
+    <table>
+        <tr>
+            <th>Judul Lagu</th>
+            <th>Judul Album</th>
+            <th>Total Play</th>
+            <th>Total Download</th>
+            <th>Total Royalti Didapat</th>
+        </tr>
+        {% for royalty in royalties %}
+        <tr>
+            <td>{{ royalty.song_title }}</td>
+            <td>{{ royalty.album_title }}</td>
+            <td>{{ royalty.total_plays }}</td>
+            <td>{{ royalty.total_downloads }}</td>
+            <td>Rp {{ royalty.total_royalties }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">No royalty records found.</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
