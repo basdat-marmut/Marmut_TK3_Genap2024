@@ -1,11 +1,13 @@
 {% extends 'base.html' %}
 {% block content %}
+{% include 'navbar_guest.html' %} 
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="form-box">
                 <h2 class="mb-3">Login</h2>
-                <form>
+                <form method="post" action="{% url 'main:login' %}">
+                    {% csrf_token %}
                     <div class="mb-3">
                         <label for="username" class="form-label">Username</label>
                         <input type="text" class="form-control" id="username" name="username" required>
@@ -18,7 +20,6 @@
                 </form>
             </div>
         </div>
-        <button type="submit" class="btn btn-primary">Login</button>
     </form>
 </div>
 {% endblock %}

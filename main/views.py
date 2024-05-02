@@ -35,12 +35,13 @@ def show_xml(request):
 @login_required(login_url='/login')
 def show_main(request):
     products = Product.objects.filter(user=request.user)
+    last_login = request.COOKIES.get('last_login', 'Your first login')  # Provides a default if 'last_login' isn't set
 
     context = {
-    'name': request.user.username,
-    'class': 'PBP A',
-    'products': products,
-    'last_login': request.COOKIES['last_login'],
+        'name': request.user.username,
+        'class': 'PBP A',
+        'products': products,
+        'last_login': last_login,  # Use the safe variable here
     }
 
     return render(request, "main.html", context)
@@ -61,8 +62,10 @@ def register(request):
     form = UserCreationForm()
 
     if request.method == "POST":
+        print("debug3")
         form = UserCreationForm(request.POST)
         if form.is_valid():
+            print("debug4")
             form.save()
             messages.success(request, 'Your account has been successfully created!')
             return redirect('main:login')
@@ -74,12 +77,13 @@ def login_user(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
         user = authenticate(request, username=username, password=password)
-        if user is not None:
+        if user:
             login(request, user)
-            messages.success(request, 'You are now logged in.')
-            return redirect('main:show_main')
+            response = redirect('main:show_main')
+            response.set_cookie('last_login', str(datetime.datetime.now()))  # Set the time of last login
+            return response
         else:
-            messages.error(request, 'Invalid username or password.')
+            messages.error(request, 'Invalid username or password')
     return render(request, 'login.html')
 
 def logout_user(request):
