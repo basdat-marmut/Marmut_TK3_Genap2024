@@ -3,69 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Albums and Songs</title>
+    <title>Manage Songs and Albums</title>
     <style>
-        table, th, td {
-            border: 1px solid black;
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #333;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+        }
+        table {
+            width: 100%;
             border-collapse: collapse;
         }
         th, td {
-            padding: 10px;
+            padding: 12px;
+            border: 1px solid #777;
+            text-align: left;
         }
         th {
-            background-color: #f2f2f2;
+            background-color: #555;
+        }
+        td {
+            background-color: #444;
+        }
+        a {
+            color: #8dbf42;
+            text-decoration: none;
+        }
+        .button {
+            background-color: #666;
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #777;
+        }
+        .container {
+            width: 90%;
+            margin: auto;
+        }
+        h1, h2 {
+            border-bottom: 1px solid #555;
+            padding-bottom: 5px;
         }
     </style>
 </head>
 <body>
-    <h1>Album Management</h1>
-    <!-- List Albums -->
-    <table>
-        <tr>
-            <th>Title</th>
-            <th>Total Songs</th>
-            <th>Total Duration</th>
-            <th>Actions</th>
-        </tr>
-        {% for album in albums %}
-        <tr>
-            <td>{{ album.title }}</td>
-            <td>{{ album.songs.count }}</td>
-            <td>{{ album.total_duration }}</td>
-            <td>
-                <a href="{% url 'view_album_label' album.id %}">View Songs</a>
-                <a href="{% url 'delete_album_label' album.id %}">Delete</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
+    <div class="container">
+        <h1>Label Album Management</h1>
 
-    <!-- List Songs in an Album -->
-    <h2>Songs in Album: {{ current_album.title }}</h2>
-    <table>
-        <tr>
-            <th>Title</th>
-            <th>Duration</th>
-            <th>Total Plays</th>
-            <th>Total Downloads</th>
-            <th>Actions</th>
-        </tr>
-        {% for song in current_album.songs.all %}
-        <tr>
-            <td>{{ song.title }}</td>
-            <td>{{ song.duration }} minutes</td>
-            <td>{{ song.total_plays }}</td>
-            <td>{{ song.total_downloads }}</td>
-            <td>
-                <a href="{% url 'delete_song_label'
-                song.id %}">Delete</a>
-            </td>
-        </tr>
-        {% empty %}
-        <tr>
-<td colspan="5">No songs found in this album.</td>
-        </tr>
-        {% endfor %}
-    </table>
-    </body>
+        <!-- List Albums -->
+        <h2>List of Albums</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Total Songs</th>
+                    <th>Total Duration</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Album1</td>
+                    <td>0</td>
+                    <td>0 minutes</td>
+                    <td>
+                        <a href="#">View Songs</a>
+                        <button class="button" onclick="alert('Delete function not implemented yet');">Delete</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Album2</td>
+                    <td>2</td>
+                    <td>4 minutes</td>
+                    <td>
+                        <a href="#">View Songs</a>
+                        <button class="button" onclick="alert('Delete function not implemented yet');">Delete</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Songs in Album: Album1</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Duration</th>
+                    <th>Total Plays</th>
+                    <th>Total Downloads</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Song1</td>
+                    <td>2 minutes</td>
+                    <td>3</td>
+                    <td>0</td>
+                    <td>
+                        <button class="button" onclick="alert('Detail function not implemented yet');">View Details</button>
+                        <button class="button" onclick="alert('Delete function not implemented yet');">Delete</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Song2</td>
+                    <td>3 minutes</td>
+                    <td>2</td>
+                    <td>2</td>
+                    <td>
+                        <button class="button" onclick="alert('Detail function not implemented yet');">View Details</button>
+                        <button class="button" onclick="alert('Delete function not implemented yet');">Delete</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
 </html>
