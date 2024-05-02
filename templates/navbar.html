@@ -14,8 +14,8 @@
                 </li>
             </ul>
             <form class="d-flex">
-                <button class="btn btn-pink me-2" type="button">Login</button>
-                <button class="btn btn-cyan" type="button">Register</button>
+                <a href="{% url 'main:login' %}" class="btn btn-pink me-2" type="submit">Login</a>
+                <a href="{% url 'main:register' %}" class="btn btn-cyan" type="submit">Register</a>
             </form>
         </div>
     </div>

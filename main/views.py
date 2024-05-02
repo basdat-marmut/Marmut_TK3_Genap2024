@@ -76,13 +76,11 @@ def login_user(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            response = HttpResponseRedirect(reverse("main:show_main")) 
-            response.set_cookie('last_login', str(datetime.datetime.now()))
-            return response
+            messages.success(request, 'You are now logged in.')
+            return redirect('main:show_main')
         else:
-            messages.info(request, 'Sorry, incorrect username or password. Please try again.')
-    context = {}
-    return render(request, 'login.html', context)
+            messages.error(request, 'Invalid username or password.')
+    return render(request, 'login.html')
 
 def logout_user(request):
     logout(request)
