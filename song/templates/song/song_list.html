@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Daftar Lagu</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Judul</th>
+                <th>Artist</th>
+                <th>Album</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for song in songs %}
+                <tr>
+                    <td>{{ song.title }}</td>
+                    <td>{{ song.artist }}</td>
+                    <td>{{ song.album }}</td>
+                    <td>
+                        <a href="{% url 'song_detail' song.id %}" class="btn btn-info btn-sm">Lihat</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

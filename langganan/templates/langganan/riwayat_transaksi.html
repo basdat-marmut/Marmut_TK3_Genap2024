@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Riwayat Transaksi Paket</h2>
+<table>
+    <tr>
+        <th>Jenis</th>
+        <th>Tanggal Dimulai</th>
+        <th>Tanggal Berakhir</th>
+        <th>Metode Pembayaran</th>
+        <th>Nominal</th>
+    </tr>
+    {% for transaksi in transaksi_list %}
+    <tr>
+        <td>{{ transaksi.jenis_paket.jenis }}</td>
+        <td>{{ transaksi.timestamp_dimulai }}</td>
+        <td>{{ transaksi.timestamp_berakhir }}</td>
+        <td>{{ transaksi.metode_bayar }}</td>
+        <td>{{ transaksi.nominal }}</td>
+    </tr>
+    {% endfor %}
+</table>
+<a href="{% url 'langganan_paket' %}">Kembali</a>
+{% endblock %}

@@ -15,6 +15,8 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 
+from playlist.models import Song, UserPlaylist
+
 
 def show_json_by_id(request, id):
     data = Product.objects.filter(pk=id)
@@ -35,12 +37,13 @@ def show_xml(request):
 @login_required(login_url='/login')
 def show_main(request):
     products = Product.objects.filter(user=request.user)
+    last_login = request.COOKIES.get('last_login', 'Your first login')  # Provides a default if 'last_login' isn't set
 
     context = {
-    'name': request.user.username,
-    'class': 'PBP A',
-    'products': products,
-    'last_login': request.COOKIES['last_login'],
+        'name': request.user.username,
+        'class': 'PBP A',
+        'products': products,
+        'last_login': last_login,  # Use the safe variable here
     }
 
     return render(request, "main.html", context)
@@ -61,8 +64,10 @@ def register(request):
     form = UserCreationForm()
 
     if request.method == "POST":
+        print("debug3")
         form = UserCreationForm(request.POST)
         if form.is_valid():
+            print("debug4")
             form.save()
             messages.success(request, 'Your account has been successfully created!')
             return redirect('main:login')
@@ -74,15 +79,14 @@ def login_user(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
         user = authenticate(request, username=username, password=password)
-        if user is not None:
+        if user:
             login(request, user)
-            response = HttpResponseRedirect(reverse("main:show_main")) 
-            response.set_cookie('last_login', str(datetime.datetime.now()))
+            response = redirect('main:show_main')
+            response.set_cookie('last_login', str(datetime.datetime.now()))  # Set the time of last login
             return response
         else:
-            messages.info(request, 'Sorry, incorrect username or password. Please try again.')
-    context = {}
-    return render(request, 'login.html', context)
+            messages.error(request, 'Invalid username or password')
+    return render(request, 'login.html')
 
 def logout_user(request):
     logout(request)
@@ -131,3 +135,88 @@ def add_product_ajax(request):
         return HttpResponse(b"CREATED", status=201)
 
     return HttpResponseNotFound()
+
+def play_song(request):
+    song_data = {
+        'title': 'Blinding Lights',
+        'genres': ['Pop', 'Synthwave'],
+        'artist': 'The Weeknd',
+        'songwriters': ['Abel Tesfaye', 'Ahmad Balshe', 'Jason Quenneville', 'Max Martin', 'Oscar Holter'],
+        'duration': 3.22,  
+        'release_date': '29/11/2019',
+        'year': 2019,
+        'album': 'After Hours',
+        'total_plays': 2_700_000_000,  
+        'total_downloads': 1_000_000  
+    }
+
+    return render(request, 'play_song.html', {'song': song_data, 'user': request.user, 'user_is_premium': True})
+
+
+@login_required
+def play_user_playlist(request):
+    songs_data = [
+        {'id': 1, 'title': 'Shape of You', 'artist': 'Ed Sheeran', 'duration': '3 minutes 53 seconds', 'play_count': 0},
+        {'id': 2, 'title': 'Blinding Lights', 'artist': 'The Weeknd', 'duration': '3 minutes 20 seconds', 'play_count': 0},
+        {'id': 3, 'title': 'Rolling in the Deep', 'artist': 'Adele', 'duration': '3 minutes 48 seconds', 'play_count': 0},
+        {'id': 4, 'title': 'Bad Guy', 'artist': 'Billie Eilish', 'duration': '3 minutes 14 seconds', 'play_count': 0},
+        {'id': 5, 'title': 'Thriller', 'artist': 'Michael Jackson', 'duration': '5 minutes 57 seconds', 'play_count': 0}
+    ]
+
+    
+    total_seconds = sum(int(song['duration'].split()[0]) * 60 + int(song['duration'].split()[2]) for song in songs_data)
+    total_hours = total_seconds // 3600
+    total_minutes = (total_seconds % 3600) // 60
+
+    playlist_data = {
+        'id': 101,
+        'title': 'basdut',
+        'creator': 'Lisan Al gaib',
+        'songs': songs_data,
+        'total_duration_hours': total_hours,
+        'total_duration_minutes': total_minutes,
+        'created_date': '2024-03-18',
+        'description': 'A playlist featuring some of the biggest hits from various artists across genres.'
+    }
+
+
+    return render(request, 'play_user_playlist.html', {'playlist': playlist_data})
+
+def search(request):
+    query = request.GET.get('query')
+    
+    if query:
+        songs = Song.objects.filter(title__icontains=query)
+        podcasts = podcast.objects.filter(title__icontains=query)
+        user_playlists = UserPlaylist.objects.filter(title__icontains=query)
+        
+        results = []
+        for song in songs:
+            results.append({
+                'type': 'SONG',
+                'title': song.title,
+                'by': song.artist,
+                'url': reverse('song_detail', args=[song.id])
+            })
+        for podcast in podcasts:
+            results.append({
+                'type': 'PODCAST',
+                'title': podcast.title,
+                'by': podcast.podcaster,
+                'url': reverse('podcast_detail', args=[podcast.id])
+            })
+        for playlist in user_playlists:
+            results.append({
+                'type': 'USER PLAYLIST',
+                'title': playlist.title,
+                'by': playlist.user.username,
+                'url': reverse('playlist_detail', args=[playlist.id])
+            })
+    else:
+        results = []
+    
+    context = {
+        'query': query,
+        'results': results
+    }
+    return render(request, 'main/search_results.html', context)

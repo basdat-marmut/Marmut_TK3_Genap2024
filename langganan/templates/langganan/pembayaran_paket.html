@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Pembayaran Paket</h2>
+<p>Informasi Paket yang Ingin Dibeli:</p>
+<table>
+    <tr>
+        <th>Jenis</th>
+        <th>Harga</th>
+    </tr>
+    <tr>
+        <td>{{ paket.jenis }}</td>
+        <td>{{ paket.harga }}</td>
+    </tr>
+</table>
+<form method="POST">
+    {% csrf_token %}
+    <label for="metode_bayar">Metode Pembayaran:</label>
+    <select name="metode_bayar" id="metode_bayar">
+        <option value="transfer_bank">Transfer Bank</option>
+        <option value="kartu_kredit">Kartu Kredit</option>
+        <option value="e_wallet">E-Wallet</option>
+    </select>
+    <br>
+    <input type="submit" value="Submit">
+</form>
+{% endblock %}

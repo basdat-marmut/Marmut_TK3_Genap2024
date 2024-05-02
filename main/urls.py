@@ -1,6 +1,6 @@
 from django.urls import path
 from main.views import show_main
-from main.views import show_main, create_product, show_xml, show_json, show_xml_by_id, show_json_by_id 
+from main.views import show_main, create_product, show_xml, show_json, show_xml_by_id, show_json_by_id, play_song, play_user_playlist
 from main.views import register 
 from main.views import login_user
 from main.views import logout_user
@@ -8,6 +8,7 @@ from main.views import edit_product
 from main.views import delete_product
 from main.views import get_product_json
 from main.views import add_product_ajax
+from main.views import search
 
 app_name = 'main'
 
@@ -19,10 +20,13 @@ urlpatterns = [
     path('xml/<int:id>/', show_xml_by_id, name='show_xml_by_id'),
     path('json/<int:id>/', show_json_by_id, name='show_json_by_id'),    
     path('register/', register, name='register'),
-    path('login/', login_user, name='login'), 
+    path('login/', login_user, name='login'),
     path('logout/', logout_user, name='logout'),
     path('edit-product/<int:id>', edit_product, name='edit_product'),
     path('delete/<int:id>', delete_product, name='delete_product'),
     path('get-product/', get_product_json, name='get_product_json'),
-    path('create-product-ajax/', add_product_ajax, name='add_product_ajax')
+    path('create-product-ajax/', add_product_ajax, name='add_product_ajax'),
+    path('search/', search, name='search'),
+    path('play-song/', play_song, name='play_song'),
+    path('play-user-playlist/', play_user_playlist, name='play_user_playlist'),
 ]

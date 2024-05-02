@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-md navbar-dark bg-dark-custom">
     <div class="container-fluid">
-        <a class="navbar-brand" href="#">Mahmud</a>
+        <a class="navbar-brand" href="#">Marmut</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -12,10 +12,19 @@
                 <li class="nav-item">
                     <a class="nav-link" href="#">Pricing</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'playlist_list' %}">Kelola Playlist</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'langganan_paket' %}">Langganan Paket</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'song_list' %}">Daftar Lagu</a>
+                </li>
             </ul>
             <form class="d-flex">
-                <button class="btn btn-pink me-2" type="button">Login</button>
-                <button class="btn btn-cyan" type="button">Register</button>
+                <a href="{% url 'main:login' %}" class="btn btn-pink me-2" type="submit">Login</a>
+                <a href="{% url 'main:register' %}" class="btn btn-cyan" type="submit">Register</a>
             </form>
         </div>
     </div>

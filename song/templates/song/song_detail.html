@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Song Detail</h2>
+    <p>Judul: {{ song.title }}</p>
+    <p>Genre(s):
+        {% for genre in song.genre.split(',') %}
+            <span class="badge bg-secondary">{{ genre }}</span>
+        {% endfor %}
+    </p>
+    <p>Artist: {{ song.artist }}</p>
+    <p>Songwriter(s):
+        {% for songwriter in song.songwriter.split(',') %}
+            <span class="badge bg-secondary">{{ songwriter }}</span>
+        {% endfor %}
+    </p>
+    <p>Durasi: {{ song.duration }} menit</p>
+    <p>Tanggal Rilis: {{ song.release_date|date:"d/m/y" }}</p>
+    <p>Tahun: {{ song.year }}</p>
+    <p>Total Play: {{ song.total_play }}</p>
+    <p>Total Downloads: {{ song.total_download }}</p>
+    <p>Album: {{ song.album }}</p>
+
+    <form id="play-form" method="post" action="{% url 'play_song' song.id %}">
+        {% csrf_token %}
+        <input type="range" id="progress" name="progress" min="0" max="100" value="0">
+        <button type="submit" class="btn btn-primary">Play</button>
+    </form>
+
+    <a href="{% url 'add_to_playlist' song.id %}" class="btn btn-success">Add to Playlist</a>
+
+    {% if is_premium %}
+        <a href="{% url 'download_song' song.id %}" class="btn btn-info">Download</a>
+    {% endif %}
+
+    <a href="{% url 'song_list' %}" class="btn btn-secondary">Kembali</a>
+</div>
+{% endblock %}

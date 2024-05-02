@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1>Tambah Lagu ke Playlist</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Tambah</button>
+        <a href="{% url 'playlist_detail' playlist.id %}" class="btn btn-secondary">Batal</a>
+    </form>
+</div>
+{% endblock %}

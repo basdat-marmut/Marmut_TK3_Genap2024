@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Daftar Lagu yang Diunduh</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Judul</th>
+                <th>Artist</th>
+                <th>Album</th>
+                <th>Tanggal Unduh</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for song in songs %}
+                <tr>
+                    <td>{{ song.song.title }}</td>
+                    <td>{{ song.song.artist }}</td>
+                    <td>{{ song.song.album }}</td>
+                    <td>{{ song.timestamp|date:"d/m/y H:i" }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'song_list' %}" class="btn btn-secondary">Kembali</a>
+</div>
+{% endblock %}
