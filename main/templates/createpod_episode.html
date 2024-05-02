@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DAFTAR EPISODE PADA PODCAST1</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ccc;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        td:last-child {
+            text-align: center;
+        }
+
+        .delete-button {
+            background-color: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .delete-button:hover {
+            background-color: #c82333;
+        }
+
+        .create-episode {
+            margin-bottom: 40px; /* Menambahkan margin bottom agar terpisah dari daftar episode */
+        }
+
+        .create-episode form {
+            margin-bottom: 20px; /* Menambahkan margin bottom agar terpisah dari daftar episode */
+        }
+
+        .create-episode label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .create-episode input,
+        .create-episode select,
+        .create-episode textarea {
+            margin-bottom: 10px;
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .create-episode button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .create-episode button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<!-- CREATE EPISODE FORM -->
+<div class="section create-episode">
+    <h2>CREATE EPISODE</h2>
+    <form action="/add_episode" method="POST"> <!-- Ganti action dengan endpoint yang sesuai -->
+        <label for="episode-podcast">Podcast:</label>
+        <select id="episode-podcast" name="episode-podcast" required>
+            <option value="Podcast1">Podcast1</option>
+            <option value="Podcast2">Podcast2</option>
+            <!-- Add more podcast options here -->
+        </select><br>
+        
+        <label for="episode-title">Judul:</label>
+        <input type="text" id="episode-title" name="episode-title" required><br>
+        
+        <label for="episode-description">Deskripsi:</label>
+        <textarea id="episode-description" name="episode-description" required></textarea><br>
+        
+        <label for="episode-duration">Durasi:</label>
+        <input type="text" id="episode-duration" name="episode-duration" required><br>
+        
+        <button type="submit">SUBMIT</button>
+    </form>
+</div>
+
+<h1>DAFTAR EPISODE PADA PODCAST1</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>Judul Episode</th>
+            <th>Deskripsi</th>
+            <th>Durasi</th>
+            <th>Tanggal</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>SubJudul1</td>
+            <td>Lorem Ipsum ....</td>
+            <td>59 menit</td>
+            <td>18/03/2024</td>
+            <td><button class="delete-button">Hapus</button></td>
+        </tr>
+        <tr>
+            <td>SubJudul2</td>
+            <td>Lorem Ipsum ....</td>
+            <td>1 jam 2 menit</td>
+            <td>25/03/2024</td>
+            <td><button class="delete-button">Hapus</button></td>
+        </tr>
+        <!-- Add more episode entries here -->
+    </tbody>
+</table>
+
+</body>
+</html>

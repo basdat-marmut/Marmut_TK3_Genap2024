@@ -220,3 +220,36 @@ def search(request):
         'results': results
     }
     return render(request, 'main/search_results.html', context)
+
+
+
+def createpod(request):
+    # Logika untuk menampilkan halaman createpod.html
+    return render(request, 'createpod.html')
+
+
+def createpodepisode(request):
+    # Logika untuk menampilkan halaman createpod.html
+    return render(request, 'createpod_episode.html')
+
+
+
+def seechart(request):
+    # Logika untuk menampilkan halaman createpod.html
+    return render(request, 'seechart.html')
+
+def daily(request):
+    return render(request, 'daily.html')
+
+def weekly(request):
+    return render(request, 'weekly.html')
+
+def monthly(request):
+    return render(request, 'monthly.html')
+
+def yearly(request):
+    return render(request, 'yearly.html')
+
+
+def podetail(request):
+    return render(request, "podcastdetail.html")

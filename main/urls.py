@@ -9,6 +9,14 @@ from main.views import delete_product
 from main.views import get_product_json
 from main.views import add_product_ajax
 from main.views import search
+from main.views import createpod
+from .views import createpodepisode
+from main.views import seechart
+from main.views import daily
+from main.views import weekly
+from main.views import monthly
+from main.views import yearly
+from main.views import podetail
 
 app_name = 'main'
 
@@ -29,4 +37,12 @@ urlpatterns = [
     path('search/', search, name='search'),
     path('play-song/', play_song, name='play_song'),
     path('play-user-playlist/', play_user_playlist, name='play_user_playlist'),
+    path('createpod.html/', createpod, name='createpod'),
+    path('createpod.html/createpod_episode.html/', createpodepisode, name='createpodepisode'),
+    path('podetail.html/', podetail, name='podetail'),
+    path('seechart.html/', seechart, name='seechart'),
+    path('seechart.html/daily.html', daily, name='daily'),
+    path('seechart.html/weekly.html', weekly, name='weekly'),
+    path('seechart.html/monthly.html', monthly, name='monthly'),
+    path('seechart.html/yearly.html', yearly, name='yearly'),
 ]
