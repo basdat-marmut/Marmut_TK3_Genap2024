@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "playlist",
     "langganan",
     "song",
+    "royalty_management",
 ]
 
 MIDDLEWARE = [
