@@ -18,8 +18,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login
 from .models import UserProfile, LabelProfile
 from django.contrib.auth.hashers import make_password
-
 from django.contrib.auth.models import User
+from connector.query import query
 
 def get_user_type(user):
     try:
@@ -239,14 +239,16 @@ from django.shortcuts import render
 from datetime import datetime, timedelta
 
 def dashboard(request):
+    user = query(f"SELECT * FROM akun WHERE email = 'sabdaps@zen.com'")[0]
+    print(user)
     # Dummy data untuk pengguna
     user = {
-        'name': 'John Doe',
-        'email': 'john@example.com',
-        'city': 'New York',
-        'gender': 'Male',
-        'birth_place': 'Los Angeles',
-        'birth_date': '1990-05-15',
+        'name': user['nama'],
+        'email': user['email'],
+        'city': user['kota_asal'],
+        'gender': user['gender'],
+        'birth_place': user['tempat_lahir'],
+        'birth_date': user['tanggal_lahir'],
         'role': 'Regular User',
         'playlists': [
             {
