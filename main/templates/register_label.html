@@ -2,8 +2,16 @@
 
 {% block content %}
 <div class="container">
+    
     <div class="form-box">
         <h2>FORM REGISTRASI - Label</h2>
+        {% if messages %}
+        <ul>
+            {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
         <form action="{% url 'main:register_label' %}" method="POST">
             {% csrf_token %}
             <label for="email" class="form-label">Email:</label>
