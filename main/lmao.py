@@ -2,7 +2,7 @@ from collections import namedtuple
 import psycopg2
 from psycopg2 import Error
 from psycopg2.extras import RealDictCursor
-from django.http import HttpRequest  # for the 'request' parameter
+
 
 
 try:
@@ -46,10 +46,9 @@ def query(query_str: str):
 
     return hasil
 
-def get_session_info(request):
-    session_id = request.COOKIES.get('session_id')
-    if session_id:
-        user = query(f"SELECT * FROM SESSIONS WHERE session_id = '{session_id}'")
-        if user:
-            return user[0]
-    return None
+email = "ganjar@pranowo.com"
+email_exists = query(f"SELECT * FROM AKUN WHERE email = '{email}' UNION SELECT * FROM LABEL WHERE email = '{email}'")
+if email_exists:
+    print("Email belum terdaftar")
+else:
+    print("Email sudah terdaftar")
