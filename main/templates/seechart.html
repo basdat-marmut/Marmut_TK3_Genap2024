@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chart List</title>
+    <style>
+        /* CSS styling */
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        tr:hover {
+            background-color: #f2f2f2;
+        }
+        .back-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .back-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Chart List -->
+    <h2>CHART LIST</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Tipe</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Daily Top 20</td>
+                <td><a href="daily.html">Lihat Daftar Lagu</a></td>
+            </tr>
+            <tr>
+                <td>Weekly Top 20</td>
+                <td><a href="weekly.html">Lihat Daftar Lagu</a></td>
+            </tr>
+            <tr>
+                <td>Monthly Top 20</td>
+                <td><a href="monthly.html">Lihat Daftar Lagu</a></td>
+            </tr>
+            <tr>
+                <td>Yearly Top 20</td>
+                <td><a href="yearly.html">Lihat Daftar Lagu</a></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Back Button -->
+    <button class="back-button" onclick="goBack()">Kembali</button>
+</div>
+
+<!-- Script to go back to previous page -->
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+
+</body>
+</html>
