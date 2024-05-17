@@ -35,8 +35,8 @@ def playlist_delete(request, playlist_id):
     playlist.delete()
     return redirect('playlist_list')
 
-def playlist_detail(request, playlist_id):
-    playlist = get_object_or_404(Playlist, id=playlist_id, user=request.user)
+def playlist_detail(request, id_user_playlist, email_pembuat):
+    playlist = get_object_or_404(UserPlaylist, id_user_playlist=id_user_playlist, email_pembuat=email_pembuat)
     songs = UserPlaylist.objects.filter(playlist=playlist)
     return render(request, 'playlist/playlist_detail.html', {'playlist': playlist, 'songs': songs})
 
@@ -48,7 +48,7 @@ def add_song_to_playlist(request, playlist_id):
             user_playlist = form.save(commit=False)
             user_playlist.playlist = playlist
             user_playlist.save()
-            return redirect('playlist_detail', playlist_id=playlist_id)
+            return redirect('playlist_detail', id_user_playlist=playlist.id_user_playlist, email_pembuat=playlist.email_pembuat)
     else:
         form = UserPlaylistForm()
     return render(request, 'playlist/add_song_to_playlist.html', {'form': form, 'playlist': playlist})
@@ -57,14 +57,13 @@ def remove_song_from_playlist(request, playlist_id, song_id):
     playlist = get_object_or_404(Playlist, id=playlist_id, user=request.user)
     song = get_object_or_404(Song, id=song_id)
     UserPlaylist.objects.filter(playlist=playlist, song=song).delete()
-    return redirect('playlist_detail', playlist_id=playlist_id)
+    return redirect('playlist_detail', id_user_playlist=playlist.id_user_playlist, email_pembuat=playlist.email_pembuat)
 
 def search(request):
     query = request.GET.get('query')
-    
     if query:
         songs = Song.objects.filter(title__icontains=query)
-        podcasts = podcast.objects.filter(title__icontains=query)
+        podcasts = podcasts.objects.filter(title__icontains=query)
         user_playlists = UserPlaylist.objects.filter(title__icontains=query)
         
         results = []
@@ -75,19 +74,12 @@ def search(request):
                 'by': song.artist,
                 'url': reverse('song_detail', args=[song.id])
             })
-        for podcast in podcasts:
-            results.append({
-                'type': 'PODCAST',
-                'title': podcast.title,
-                'by': podcast.podcaster,
-                'url': reverse('podcast_detail', args=[podcast.id])
-            })
         for playlist in user_playlists:
             results.append({
                 'type': 'USER PLAYLIST',
                 'title': playlist.title,
-                'by': playlist.user.username,
-                'url': reverse('playlist_detail', args=[playlist.id])
+                'by': playlist.email_pembuat,
+                'url': reverse('playlist_detail', args=[playlist.id_user_playlist, playlist.email_pembuat])
             })
     else:
         results = []

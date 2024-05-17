@@ -11,7 +11,7 @@ def song_list(request):
     return render(request, 'song/song_list.html', {'songs': songs})
 
 def song_detail(request, song_id):
-    song = get_object_or_404(Song, id=song_id)
+    song = get_object_or_404(Song, id_konten=song_id)
     is_premium = request.user.is_authenticated and request.user.is_premium
     return render(request, 'song/song_detail.html', {'song': song, 'is_premium': is_premium})
 

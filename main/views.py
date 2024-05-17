@@ -252,43 +252,51 @@ def play_user_playlist(request):
     return render(request, 'play_user_playlist.html', {'playlist': playlist_data})
 
 def search(request):
-    query = request.GET.get('query')
+    query_str = request.GET.get('query')
     
-    if query:
-        songs = query(f"SELECT * FROM SONG WHERE title ILIKE '%{query}%'")
-        podcasts = query(f"SELECT * FROM PODCAST WHERE title ILIKE '%{query}%'")
-        user_playlists = query(f"SELECT * FROM USER_PLAYLIST WHERE title ILIKE '%{query}%'")
+    if query_str:
+        songs = query(f"""
+            SELECT k.id, k.judul AS title, string_agg(distinct g.genre, ', ') AS genre, ak.nama AS artist_name
+            FROM KONTEN k
+            JOIN SONG s ON k.id = s.id_konten
+            JOIN GENRE g ON k.id = g.id_konten
+            JOIN ARTIST a ON s.id_artist = a.id
+            JOIN AKUN ak ON a.email_akun = ak.email
+            WHERE k.judul ILIKE '%{query_str}%'
+            GROUP BY k.id, k.judul, ak.nama
+        """)
+        
+        user_playlists = query(f"""
+            SELECT up.id_user_playlist, up.judul AS title, up.email_pembuat AS creator_email, ak.nama AS creator_name
+            FROM USER_PLAYLIST up
+            JOIN AKUN ak ON up.email_pembuat = ak.email
+            WHERE up.judul ILIKE '%{query_str}%'
+        """)
         
         results = []
         for song in songs:
             results.append({
                 'type': 'SONG',
                 'title': song['title'],
-                'by': song['artist'],
+                'genre': song['genre'],
+                'by': song['artist_name'],
                 'url': reverse('song_detail', args=[song['id']])
-            })
-        for podcast in podcasts:
-            results.append({
-                'type': 'PODCAST',
-                'title': podcast['title'],
-                'by': podcast['podcaster'],
-                'url': reverse('podcast_detail', args=[podcast['id']])
             })
         for playlist in user_playlists:
             results.append({
                 'type': 'USER PLAYLIST',
                 'title': playlist['title'],
-                'by': playlist['user'],
-                'url': reverse('playlist_detail', args=[playlist['id']])
+                'by': playlist['creator_name'],
+                'url': reverse('playlist_detail', args=[playlist['id_user_playlist'], playlist['creator_email']])
             })
     else:
         results = []
     
     context = {
-        'query': query,
+        'query': query_str,
         'results': results
     }
-    return render(request, 'main/search_results.html', context)
+    return render(request, 'search_results.html', context)
 
 def createpod(request):
     # Logika untuk menampilkan halaman createpod.html

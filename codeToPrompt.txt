@@ -1,4 +1,4 @@
-ini adalah kode lengkap kita sekarang:
+ini adalah kode sekarang:
 
 templates\base.html:
 <!DOCTYPE html>
@@ -120,9 +120,6 @@ templates\navbar_user.html:
                             <a class="nav-link" href="#">Chart</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Search Bar</a>
-                        </li>
-                        <li class="nav-item">
                             <a class="nav-link" href="#">Kelola Playlist</a>
                         </li>
                         <li class="nav-item">
@@ -164,6 +161,10 @@ templates\navbar_user.html:
                     </li>
                 {% endif %}
             </ul>
+            <form class="d-flex" action="{% url 'main:search' %}" method="get">
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="query">
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
             {% if user_type == 'guest' %}
                 <form class="d-flex">
                     <button class="btn btn-pink me-2" type="button" onclick="location.href='{% url 'main:login' %}'">Login</button>
@@ -209,7 +210,6 @@ templates\search_results.html:
     <p>Maaf, pencarian untuk "{{ query }}" tidak ditemukan</p>
 {% endif %}
 {% endblock %}
-
 
 
 connector\query.py:
@@ -554,7 +554,7 @@ from . import views
 
 urlpatterns = [
     path('', views.song_list, name='song_list'),
-    path('<int:song_id>/', views.song_detail, name='song_detail'),
+    path('<str:song_id>/', views.song_detail, name='song_detail'),
     path('<int:song_id>/play/', views.play_song, name='play_song'),
     path('<int:song_id>/add-to-playlist/', views.add_to_playlist, name='add_to_playlist'),
     path('<int:song_id>/download/', views.download_song, name='download_song'),
@@ -578,7 +578,7 @@ def song_list(request):
     return render(request, 'song/song_list.html', {'songs': songs})
 
 def song_detail(request, song_id):
-    song = get_object_or_404(Song, id=song_id)
+    song = get_object_or_404(Song, id_konten=song_id)
     is_premium = request.user.is_authenticated and request.user.is_premium
     return render(request, 'song/song_detail.html', {'song': song, 'is_premium': is_premium})
 
@@ -1084,43 +1084,61 @@ def play_user_playlist(request):
     return render(request, 'play_user_playlist.html', {'playlist': playlist_data})
 
 def search(request):
-    query = request.GET.get('query')
+    query_str = request.GET.get('query')
     
-    if query:
-        songs = query(f"SELECT * FROM SONG WHERE title ILIKE '%{query}%'")
-        podcasts = query(f"SELECT * FROM PODCAST WHERE title ILIKE '%{query}%'")
-        user_playlists = query(f"SELECT * FROM USER_PLAYLIST WHERE title ILIKE '%{query}%'")
+    if query_str:
+        songs = query(f"""
+            SELECT k.id, k.judul AS title, string_agg(distinct g.genre, ', ') AS genre, ak.nama AS artist_name
+            FROM KONTEN k
+            JOIN SONG s ON k.id = s.id_konten
+            JOIN GENRE g ON k.id = g.id_konten
+            JOIN ARTIST a ON s.id_artist = a.id
+            JOIN AKUN ak ON a.email_akun = ak.email
+            WHERE k.judul ILIKE '%{query_str}%'
+            GROUP BY k.id, k.judul, ak.nama
+        """)
+        
+        podcasts = query(f"""
+            SELECT k.id, k.judul AS title, string_agg(distinct g.genre, ', ') AS genre, ak.nama AS podcaster_name
+            FROM KONTEN k
+            JOIN PODCAST p ON k.id = p.id_konten
+            JOIN GENRE g ON k.id = g.id_konten
+            JOIN AKUN ak ON p.email_podcaster = ak.email
+            WHERE k.judul ILIKE '%{query_str}%'
+            GROUP BY k.id, k.judul, ak.nama
+        """)
+        
+        user_playlists = query(f"""
+            SELECT up.id_user_playlist, up.judul AS title, ak.nama AS creator_name
+            FROM USER_PLAYLIST up
+            JOIN AKUN ak ON up.email_pembuat = ak.email
+            WHERE up.judul ILIKE '%{query_str}%'
+        """)
         
         results = []
         for song in songs:
             results.append({
                 'type': 'SONG',
                 'title': song['title'],
-                'by': song['artist'],
+                'genre': song['genre'],
+                'by': song['artist_name'],
                 'url': reverse('song_detail', args=[song['id']])
-            })
-        for podcast in podcasts:
-            results.append({
-                'type': 'PODCAST',
-                'title': podcast['title'],
-                'by': podcast['podcaster'],
-                'url': reverse('podcast_detail', args=[podcast['id']])
             })
         for playlist in user_playlists:
             results.append({
                 'type': 'USER PLAYLIST',
                 'title': playlist['title'],
-                'by': playlist['user'],
-                'url': reverse('playlist_detail', args=[playlist['id']])
+                'by': playlist['creator_name'],
+                'url': reverse('playlist_detail', args=[playlist['id_user_playlist'], playlist['email_pembuat']])
             })
     else:
         results = []
     
     context = {
-        'query': query,
+        'query': query_str,
         'results': results
     }
-    return render(request, 'main/search_results.html', context)
+    return render(request, 'search_results.html', context)
 
 def createpod(request):
     # Logika untuk menampilkan halaman createpod.html
