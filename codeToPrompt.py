@@ -38,7 +38,21 @@ def write_to_txt(file_paths, output_file="codeToPrompt.txt"):
 
 # List of file paths including empty ones and directories
 file_paths = [
-    r"Marmut_TK3_Genap2024\playlist\templates\playlist"
+    r"templates",
+    r"connector\query.py",
+    r"langganan",
+    r"langganan\templates\langganan",
+    r"song",
+    r"main",
+    r"marmut",
+    r"main\templates",
+    r"static\css\style.css",
+    r"main\static\css\style.css",
+    r"marmut",
+    r"",
+    r"",
+    r"",
+    r"",
 ]
 
 write_to_txt(file_paths)

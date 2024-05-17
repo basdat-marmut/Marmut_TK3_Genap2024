@@ -59,6 +59,7 @@ def downloaded_songs(request):
     songs = DownloadedSong.objects.filter(user=request.user).order_by('-timestamp')
     return render(request, 'song/downloaded_songs.html', {'songs': songs})
 
+
 def search(request):
     query = request.GET.get('query')
     

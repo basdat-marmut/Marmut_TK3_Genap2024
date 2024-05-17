@@ -175,29 +175,25 @@ def login_user(request):
         password = request.POST.get('password')
         user = query(f"SELECT * FROM AKUN WHERE email = '{email}' AND password = '{password}' UNION SELECT * FROM LABEL WHERE email = '{email}' AND password = '{password}'")
         if len(user) == 0:
-            
             messages.error(request, 'Invalid email or password!')
         else:
-            #menentukan user type
-
             is_artist = len(query(f"SELECT * FROM ARTIST WHERE email_akun = '{email}'")) != 0
             is_songwriter = len(query(f"SELECT * FROM SONGWRITER WHERE email_akun = '{email}'")) != 0
             is_podcaster = len(query(f"SELECT * FROM PODCASTER WHERE email = '{email}'")) != 0
             is_premium = len(query(f"SELECT * FROM PREMIUM WHERE email = '{email}'")) != 0
             is_label = len(query(f"SELECT * FROM LABEL WHERE email = '{email}'")) != 0
-            
 
             session_id = str(uuid.uuid4())
             temp = query(f"""INSERT INTO SESSIONS (session_id, email, is_label, is_premium, is_artist, is_songwriter, is_podcaster) 
-                  VALUES ('{session_id}', '{email}' , {is_label}, {is_premium}, {is_artist}, {is_songwriter}, {is_podcaster})
-                """)
-
+                            VALUES ('{session_id}', '{email}', {is_label}, {is_premium}, {is_artist}, {is_songwriter}, {is_podcaster})
+                        """)
 
             response = redirect('main:dashboard')
             response.set_cookie('session_id', session_id)
             return response
 
     return render(request, 'login.html')
+
 
 def logout_user(request):
     session_id = request.COOKIES.get('session_id')
@@ -259,31 +255,31 @@ def search(request):
     query = request.GET.get('query')
     
     if query:
-        songs = Song.objects.filter(title__icontains=query)
-        podcasts = podcast.objects.filter(title__icontains=query)
-        user_playlists = UserPlaylist.objects.filter(title__icontains=query)
+        songs = query(f"SELECT * FROM SONG WHERE title ILIKE '%{query}%'")
+        podcasts = query(f"SELECT * FROM PODCAST WHERE title ILIKE '%{query}%'")
+        user_playlists = query(f"SELECT * FROM USER_PLAYLIST WHERE title ILIKE '%{query}%'")
         
         results = []
         for song in songs:
             results.append({
                 'type': 'SONG',
-                'title': song.title,
-                'by': song.artist,
-                'url': reverse('song_detail', args=[song.id])
+                'title': song['title'],
+                'by': song['artist'],
+                'url': reverse('song_detail', args=[song['id']])
             })
         for podcast in podcasts:
             results.append({
                 'type': 'PODCAST',
-                'title': podcast.title,
-                'by': podcast.podcaster,
-                'url': reverse('podcast_detail', args=[podcast.id])
+                'title': podcast['title'],
+                'by': podcast['podcaster'],
+                'url': reverse('podcast_detail', args=[podcast['id']])
             })
         for playlist in user_playlists:
             results.append({
                 'type': 'USER PLAYLIST',
-                'title': playlist.title,
-                'by': playlist.user.username,
-                'url': reverse('playlist_detail', args=[playlist.id])
+                'title': playlist['title'],
+                'by': playlist['user'],
+                'url': reverse('playlist_detail', args=[playlist['id']])
             })
     else:
         results = []
@@ -294,8 +290,6 @@ def search(request):
     }
     return render(request, 'main/search_results.html', context)
 
-
-
 def createpod(request):
     # Logika untuk menampilkan halaman createpod.html
     return render(request, 'createpod.html')
@@ -304,8 +298,6 @@ def createpod(request):
 def createpodepisode(request):
     # Logika untuk menampilkan halaman createpod.html
     return render(request, 'createpod_episode.html')
-
-
 
 def seechart(request):
     # Logika untuk menampilkan halaman createpod.html
@@ -340,10 +332,7 @@ def dashboard(request):
     user = query(f"SELECT * FROM AKUN WHERE email = '{email}'")[0]
     if ses_info['is_label']:
         user = query(f"SELECT * FROM LABEL WHERE email = '{email}'")[0]
-    # print(ses_info)
-    # print("user : ", user)
-    # Dummy data untuk pengguna
-    # TODO: HANDLE 
+
     user = {
         'name': user['nama'],
         'email': user['email'],
@@ -376,6 +365,6 @@ def dashboard(request):
 
     context = {
         'user': user,
-        'user_type': 'user',
+        'user_type': ses_info['is_label'] and 'label' or 'user',
     }
     return render(request, 'dashboard.html', context)
