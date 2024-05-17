@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2>Daftar Lagu yang Diunduh</h2>
-<table class="table table-dark">
+<h2>DAFTAR LAGU</h2>
+
+<table>
     <thead>
         <tr>
             <th>Judul Lagu</th>
@@ -12,21 +13,30 @@
         </tr>
     </thead>
     <tbody>
-        {% for song in songs %}
+        {% for downloaded_song in downloaded_songs %}
         <tr>
-            <td>{{ song.title }}</td>
-            <td>{{ song.artist }}</td>
-            <td>{{ song.timestamp }}</td>
+            <td>{{ downloaded_song.song.title }}</td>
+            <td>{{ downloaded_song.song.artist }}</td>
+            <td>{{ downloaded_song.timestamp|date:"d/m/Y" }}</td>
             <td>
-                <a href="{% url 'song_detail' song.song.id %}" class="btn btn-info">Lihat</a>
-                <form method="post" action="{% url 'delete_downloaded_song' song.id %}" style="display:inline;">
+                <a href="{% url 'song_detail' downloaded_song.song.id %}">Lihat</a>
+                <form method="post" style="display: inline;">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-danger">Hapus</button>
+                    <input type="hidden" name="song_id" value="{{ downloaded_song.song.id }}">
+                    <button type="submit">Hapus</button>
                 </form>
             </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
-<a href="{% url 'langganan:langganan_paket' %}" class="btn btn-secondary">Kembali</a>
+
+<a href="{% url 'song_list' %}">Kembali</a>
+
+{% if messages %}
+    {% for message in messages %}
+    <p>{{ message }}</p>
+    {% endfor %}
+{% endif %}
+
 {% endblock %}

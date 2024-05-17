@@ -554,7 +554,7 @@ from . import views
 
 urlpatterns = [
     path('', views.song_list, name='song_list'),
-    path('<str:song_id>/', views.song_detail, name='song_detail'),
+    path('<int:song_id>/', views.song_detail, name='song_detail'),
     path('<int:song_id>/play/', views.play_song, name='play_song'),
     path('<int:song_id>/add-to-playlist/', views.add_to_playlist, name='add_to_playlist'),
     path('<int:song_id>/download/', views.download_song, name='download_song'),
@@ -567,73 +567,135 @@ urlpatterns = [
 song\views.py:
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
+from django.contrib import messages
+from django.utils import timezone
 from .models import Song, AkunPlaySong, DownloadedSong
 from playlist.models import Playlist, UserPlaylist
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from django.utils import timezone
+from connector.query import query, get_session_info
 
 def song_list(request):
     songs = Song.objects.all()
     return render(request, 'song/song_list.html', {'songs': songs})
 
 def song_detail(request, song_id):
-    song = get_object_or_404(Song, id_konten=song_id)
-    is_premium = request.user.is_authenticated and request.user.is_premium
-    return render(request, 'song/song_detail.html', {'song': song, 'is_premium': is_premium})
+    ses_info = get_session_info(request)
+    if not ses_info:
+        return redirect('main:login')
+    
+    song = get_object_or_404(Song, id=song_id)
+    is_premium = ses_info.get('is_premium', False)
+    user_email = ses_info['email']
 
-@login_required
+    if request.method == 'POST':
+        if 'play' in request.POST:
+            progress = int(request.POST.get('progress', 0))
+            if progress > 70:
+                song.total_play += 1
+                song.save()
+                AkunPlaySong.objects.create(email_pemain=user_email, id_song=song_id, waktu=timezone.now())
+        
+        elif 'add_to_playlist' in request.POST:
+            playlist_id = request.POST.get('playlist')
+            playlist = get_object_or_404(Playlist, id=playlist_id)
+            if UserPlaylist.objects.filter(id_user_playlist=playlist_id, id_song=song_id).exists():
+                message = f"Lagu dengan judul '{song.title}' sudah ditambahkan di '{playlist.title}'!"
+            else:
+                UserPlaylist.objects.create(id_user_playlist=playlist_id, id_song=song_id)
+                message = f"Berhasil menambahkan Lagu dengan judul '{song.title}' ke '{playlist.title}'!"
+            return render(request, 'song/song_detail.html', {'song': song, 'is_premium': is_premium, 'message': message})
+        
+        elif 'download' in request.POST:
+            if is_premium:
+                if DownloadedSong.objects.filter(email_downloader=user_email, id_song=song_id).exists():
+                    message = f"Lagu dengan judul '{song.title}' sudah pernah di unduh!"
+                else:
+                    DownloadedSong.objects.create(email_downloader=user_email, id_song=song_id)
+                    song.total_download += 1
+                    song.save()
+                    message = f"Berhasil mengunduh Lagu dengan judul '{song.title}'!"
+                return render(request, 'song/song_detail.html', {'song': song, 'is_premium': is_premium, 'message': message})
+    
+    playlists = Playlist.objects.filter(email_pembuat=user_email)
+    return render(request, 'song/song_detail.html', {'song': song, 'is_premium': is_premium, 'playlists': playlists})
+
 def play_song(request, song_id):
+    ses_info = get_session_info(request)
+    if not ses_info:
+        return redirect('main:login')
+    
     song = get_object_or_404(Song, id=song_id)
     progress = int(request.POST.get('progress', 0))
+    user_email = ses_info['email']
     if progress > 70:
         song.total_play += 1
         song.save()
-        AkunPlaySong.objects.create(user=request.user, song=song)
+        AkunPlaySong.objects.create(email_pemain=user_email, id_song=song_id)
     return JsonResponse({'status': 'success'})
 
-@login_required
 def add_to_playlist(request, song_id):
+    ses_info = get_session_info(request)
+    if not ses_info:
+        return redirect('main:login')
+    
     song = get_object_or_404(Song, id=song_id)
+    user_email = ses_info['email']
     if request.method == 'POST':
         playlist_id = request.POST.get('playlist')
-        playlist = get_object_or_404(Playlist, id=playlist_id, user=request.user)
-        UserPlaylist.objects.create(playlist=playlist, song=song)
+        playlist = get_object_or_404(Playlist, id=playlist_id)
+        UserPlaylist.objects.create(id_user_playlist=playlist_id, id_song=song_id)
         return render(request, 'song/message.html', {
             'message': f"Berhasil menambahkan Lagu dengan judul '{song.title}' ke '{playlist.name}'!",
-            'playlist_url': reverse('playlist_detail', args=[playlist.id]),
-            'song_id': song.id,
+            'playlist_url': reverse('playlist_detail', args=[playlist_id]),
+            'song_id': song_id,
         })
-    playlists = Playlist.objects.filter(user=request.user)
+    playlists = Playlist.objects.filter(email_pembuat=user_email)
     return render(request, 'song/add_to_playlist.html', {'song': song, 'playlists': playlists})
 
-@login_required
 def download_song(request, song_id):
+    ses_info = get_session_info(request)
+    if not ses_info:
+        return redirect('main:login')
+    
     song = get_object_or_404(Song, id=song_id)
-    if request.user.is_premium:
+    user_email = ses_info['email']
+    if ses_info.get('is_premium', False):
         song.total_download += 1
         song.save()
-        DownloadedSong.objects.create(user=request.user, song=song)
+        DownloadedSong.objects.create(email_downloader=user_email, id_song=song_id)
         return render(request, 'song/message.html', {
             'message': f"Berhasil mengunduh Lagu dengan judul '{song.title}'!",
             'playlist_url': reverse('downloaded_songs'),
-            'song_id': song.id,
+            'song_id': song_id,
         })
-    return redirect('song_detail', song_id=song.id)
+    return redirect('song_detail', song_id=song_id)
 
-@login_required
 def downloaded_songs(request):
-    songs = DownloadedSong.objects.filter(user=request.user).order_by('-timestamp')
-    return render(request, 'song/downloaded_songs.html', {'songs': songs})
-
+    ses_info = get_session_info(request)
+    if not ses_info:
+        return redirect('main:login')
+    
+    user_email = ses_info['email']
+    downloaded_songs = DownloadedSong.objects.filter(email_downloader=user_email).order_by('-timestamp')
+    
+    if request.method == 'POST':
+        song_id = request.POST.get('song_id')
+        song = get_object_or_404(Song, id=song_id)
+        downloaded_song = get_object_or_404(DownloadedSong, email_downloader=user_email, id_song=song_id)
+        downloaded_song.delete()
+        song.total_download -= 1
+        song.save()
+        messages.success(request, f"Berhasil menghapus Lagu dengan judul '{song.title}' dari daftar unduhan!")
+        return redirect('downloaded_songs')
+    
+    return render(request, 'song/downloaded_songs.html', {'downloaded_songs': downloaded_songs})
 
 def search(request):
-    query = request.GET.get('query')
+    query_str = request.GET.get('query')
     
-    if query:
-        songs = Song.objects.filter(title__icontains=query)
-        podcasts = podcast.objects.filter(title__icontains=query)
-        user_playlists = UserPlaylist.objects.filter(title__icontains=query)
+    if query_str:
+        songs = Song.objects.filter(title__icontains=query_str)
+        podcasts = Podcast.objects.filter(title__icontains=query_str)
+        user_playlists = UserPlaylist.objects.filter(title__icontains=query_str)
         
         results = []
         for song in songs:
@@ -661,10 +723,11 @@ def search(request):
         results = []
     
     context = {
-        'query': query,
+        'query': query_str,
         'results': results
     }
     return render(request, 'main/search_results.html', context)
+
 
 
 song\__init__.py:
@@ -1098,18 +1161,8 @@ def search(request):
             GROUP BY k.id, k.judul, ak.nama
         """)
         
-        podcasts = query(f"""
-            SELECT k.id, k.judul AS title, string_agg(distinct g.genre, ', ') AS genre, ak.nama AS podcaster_name
-            FROM KONTEN k
-            JOIN PODCAST p ON k.id = p.id_konten
-            JOIN GENRE g ON k.id = g.id_konten
-            JOIN AKUN ak ON p.email_podcaster = ak.email
-            WHERE k.judul ILIKE '%{query_str}%'
-            GROUP BY k.id, k.judul, ak.nama
-        """)
-        
         user_playlists = query(f"""
-            SELECT up.id_user_playlist, up.judul AS title, ak.nama AS creator_name
+            SELECT up.id_user_playlist, up.judul AS title, up.email_pembuat AS creator_email, ak.nama AS creator_name
             FROM USER_PLAYLIST up
             JOIN AKUN ak ON up.email_pembuat = ak.email
             WHERE up.judul ILIKE '%{query_str}%'
@@ -1129,7 +1182,7 @@ def search(request):
                 'type': 'USER PLAYLIST',
                 'title': playlist['title'],
                 'by': playlist['creator_name'],
-                'url': reverse('playlist_detail', args=[playlist['id_user_playlist'], playlist['email_pembuat']])
+                'url': reverse('playlist_detail', args=[playlist['id_user_playlist'], playlist['creator_email']])
             })
     else:
         results = []
