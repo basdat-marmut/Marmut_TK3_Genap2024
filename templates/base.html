@@ -7,21 +7,21 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body, .form-label, .btn {
-            background-color: #121212; /* Dark background for the body */
-            color: #fff; /* White text for readability */
+            background-color: #121212; 
+            color: #fff; 
         }
         h2 {
-            color: #fff; /* White text for headings */
+            color: #fff; 
         }
         .form-box {
-            background-color: #333; /* Darker box for form */
+            background-color: #333;
             padding: 20px;
             border-radius: 8px;
-            border: 1px solid #444; /* Subtle border for the form */
-            box-shadow: 0 4px 8px rgba(0,0,0,0.5); /* Adding some shadow for depth */
+            border: 1px solid #444;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
         }
         .btn-pink {
-            background-color: #ff007f; /* Pink color for the button */
+            background-color: #ff007f; 
             border-color: #ff007f;
         }
         .btn-pink:hover {
@@ -29,7 +29,7 @@
             border-color: #cc0066;
         }
         .btn-cyan {
-            background-color: #00ffff; /* Cyan color for the button */
+            background-color: #00ffff; 
             border-color: #00ffff;
         }
         .btn-cyan:hover {
@@ -37,19 +37,18 @@
             border-color: #00cccc;
         }
         .form-control {
-            background-color: #222; /* Darker background for inputs */
-            border: 1px solid #555; /* Dark border for inputs */
-            color: #fff; /* White text for inputs */
+            background-color: #222;
+            border: 1px solid #555;
+            color: #fff;
         }
         .form-control:focus {
-            box-shadow: 0 0 0 0.25rem rgba(0, 255, 255, 0.25); /* Cyan glow for focus */
-            border-color: #00ffff; /* Cyan border for focus */
+            box-shadow: 0 0 0 0.25rem rgba(0, 255, 255, 0.25);
+            border-color: #00ffff;
         }
     </style>
 </head>
 <body>
     {% include 'navbar_user.html' %}
-    
 
     <div class="container mt-4">
         {% block content %}{% endblock %}
@@ -58,4 +57,3 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-

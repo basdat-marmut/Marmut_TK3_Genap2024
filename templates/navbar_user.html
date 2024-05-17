@@ -15,14 +15,12 @@
                             <a class="nav-link" href="#">Chart</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Search Bar</a>
-                        </li>
-                        <li class="nav-item">
                             <a class="nav-link" href="#">Kelola Playlist</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Langganan Paket</a>
+                            <a class="nav-link" href="{% url 'langganan:langganan_paket' %}">Langganan Paket</a>
                         </li>
+                        
                     {% endif %}
                     {% if user_type == 'premium' %}
                         <li class="nav-item">
@@ -58,6 +56,10 @@
                     </li>
                 {% endif %}
             </ul>
+            <form class="d-flex" action="{% url 'main:search' %}" method="get">
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="query">
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
             {% if user_type == 'guest' %}
                 <form class="d-flex">
                     <button class="btn btn-pink me-2" type="button" onclick="location.href='{% url 'main:login' %}'">Login</button>
