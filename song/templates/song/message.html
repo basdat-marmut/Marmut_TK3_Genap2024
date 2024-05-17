@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>{{ message }}</h2>
+    <a href="{{ playlist_url }}" class="btn btn-primary">Ke Playlist</a>
+    <a href="{% url 'song_detail' song_id %}" class="btn btn-secondary">Kembali</a>
+</div>
+{% endblock %}

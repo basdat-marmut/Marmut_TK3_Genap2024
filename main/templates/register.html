@@ -1,34 +1,16 @@
 {% extends 'base.html' %}
 
-{% block meta %}
-    <title>Register</title>
-{% endblock meta %}
-
-{% block content %}  
-
-<div class = "login">
-    
-    <h1>Register</h1>  
-
-        <form method="POST" >  
-            {% csrf_token %}  
-            <table>  
-                {{ form.as_table }}  
-                <tr>  
-                    <td></td>
-                    <td><input type="submit" name="submit" value="Daftar"/></td>  
-                </tr>  
-            </table>  
-        </form>
-
-    {% if messages %}  
-        <ul>   
-            {% for message in messages %}  
-                <li>{{ message }}</li>  
-                {% endfor %}  
-        </ul>   
-    {% endif %}
-
-</div>  
-
-{% endblock content %}
+{% block content %}
+<div class="container mt-5 d-flex justify-content-center">
+    <div class="form-box text-center" style="width: 50%; padding: 30px;">
+        <h2>Register</h2>
+        <p>Select your registration type:</p>
+        <div class="btn-group-vertical" role="group" aria-label="Registration Type">
+            <!-- Button for Pengguna with cyan color -->
+            <button type="button" class="btn btn-cyan btn-lg mb-3" style="padding: 10px 20px;" onclick="window.location.href='{% url "main:register_user" %}'">Pengguna</button>
+            <!-- Button for Label with pink color -->
+            <button type="button" class="btn btn-pink btn-lg" style="padding: 10px 20px;" onclick="window.location.href='{% url "main:register_label" %}'">Label</button>
+        </div>
+    </div>
+</div>
+{% endblock %}

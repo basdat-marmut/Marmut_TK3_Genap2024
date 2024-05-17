@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="form-box">
+        <h2>FORM REGISTRASI</h2>
+        {% if messages %}
+        <ul>
+            {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        <form action="{% url 'main:register_user' %}" method="POST">
+            {% csrf_token %}
+            <label for="email" class="form-label">Email:</label>
+            <input type="email" id="email" name="email" required class="form-control"><br>
+
+            <label for="password" class="form-label">Password:</label>
+            <input type="password" id="password" name="password" required class="form-control"><br>
+
+            <label for="name" class="form-label">Nama:</label>
+            <input type="text" id="name" name="name" required class="form-control"><br>
+
+            <label for="gender" class="form-label">Gender:</label>
+            <select id="gender" name="gender" class="form-control">
+                <option value="male">Laki-laki</option>
+                <option value="female">Perempuan</option>
+            </select><br>
+            
+            <label for="birthplace" class="form-label">Tempat Lahir :</label>
+            <input type="text" id="birthplace" name="birthplace" required class="form-control"><br>
+
+            <label for="birthdate" class="form-label">Tanggal lahir:</label>
+            <input type="date" id="birthdate" name="birthdate" required class="form-control"><br>
+
+            <label for="city" class="form-label">Kota asal:</label>
+            <input type="text" id="city" name="city" required class="form-control"><br>
+
+            <label class="form-label">Role:</label><br>
+            <input type="checkbox" id="podcaster" name="is_podcaster" value="True" class="form-check-input">
+            <label for="podcaster" class="form-check-label">Podcaster</label><br>
+
+            <input type="checkbox" id="artist" name="is_artist" value="True" class="form-check-input">
+            <label for="artist" class="form-check-label">Artist</label><br>
+
+            <input type="checkbox" id="songwriter" name="is_songwriter" value="True" class="form-check-input">
+            <label for="songwriter" class="form-check-label">Songwriter</label><br><br>
+
+            <button type="submit" class="btn btn-pink">Register</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1>{% if form.instance.pk %}Ubah{% else %}Tambah{% endif %} Playlist</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Simpan</button>
+        <a href="{% url 'playlist_list' %}" class="btn btn-secondary">Batal</a>
+    </form>
+</div>
+{% endblock %}

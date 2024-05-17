@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    
+    <div class="form-box">
+        <h2>FORM REGISTRASI - Label</h2>
+        {% if messages %}
+        <ul>
+            {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        <form action="{% url 'main:register_label' %}" method="POST">
+            {% csrf_token %}
+            <label for="email" class="form-label">Email:</label>
+            <input type="email" id="email" name="email" required class="form-control"><br>
+
+            <label for="password" class="form-label">Password:</label>
+            <input type="password" id="password" name="password" required class="form-control"><br>
+
+            <label for="name" class="form-label">Nama:</label>
+            <input type="text" id="name" name="name" required class="form-control"><br>
+
+            <label for="contact" class="form-label">Kontak:</label>
+            <input type="text" id="contact" name="contact" required class="form-control"><br>
+
+            <button type="submit" class="btn btn-cyan">Register</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

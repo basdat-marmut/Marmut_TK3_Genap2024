@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Langganan Paket</h2>
+<table>
+    <tr>
+        <th>Jenis</th>
+        <th>Harga</th>
+        <th>Action</th>
+    </tr>
+    {% for paket in paket_list %}
+    <tr>
+        <td>{{ paket.jenis }}</td>
+        <td>{{ paket.harga }}</td>
+        <td><a href="{% url 'pembayaran_paket' paket.jenis %}">Berlangganan</a></td>
+    </tr>
+    {% endfor %}
+</table>
+<a href="{% url 'riwayat_transaksi' %}">Riwayat Transaksi</a>
+{% endblock %}

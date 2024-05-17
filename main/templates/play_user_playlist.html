@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% include 'navbar_guest.html' %} 
+<div class="container mt-4">
+    <div class="card bg-dark text-white">
+        <div class="card-header">
+            <h1>{{ playlist.title }}</h1>
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">Created by: {{ playlist.creator }}</h5>
+            <p class="card-text"><strong>Number of Songs:</strong> {{ playlist.songs|length }}</p>
+            <p class="card-text"><strong>Total Duration:</strong> {{ playlist.total_duration_hours }} hours {{ playlist.total_duration_minutes }} minutes</p>
+            <p class="card-text"><strong>Created On:</strong> {{ playlist.created_date }}</p>
+            <p class="card-text"><strong>Description:</strong> {{ playlist.description }}</p>
+            
+            <button class="btn btn-primary mt-2" onclick="shufflePlay()">Shuffle Play</button>
+        </div>
+        <div class="card-footer text-muted">
+            <a  class="btn btn-outline-light">Back</a>
+        </div>
+    </div>
+
+    <div class="table-responsive mt-4">
+        <table class="table table-dark table-striped">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Artist</th>
+                    <th>Duration</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for song in playlist.songs %}
+                <tr>
+                    <td>{{ song.title }}</td>
+                    <td>{{ song.artist }}</td>
+                    <td>{{ song.duration }}</td>
+                    <td>
+                        <a class="btn btn-sm btn-secondary">View</a>
+                        <button class="btn btn-sm btn-info" >Play</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

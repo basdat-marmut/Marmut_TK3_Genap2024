@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Add Song to User Playlist</h2>
+    <p>Judul: {{ song.title }}</p>
+    <p>Artist: {{ song.artist }}</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="playlist" class="form-label">Playlist:</label>
+            <select class="form-select" id="playlist" name="playlist" required>
+                <option value="">Pilih Playlist</option>
+                {% for playlist in playlists %}
+                    <option value="{{ playlist.id }}">{{ playlist.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Tambah</button>
+        <a href="{% url 'song_detail' song.id %}" class="btn btn-secondary">Kembali</a>
+    </form>
+</div>
+{% endblock %}
