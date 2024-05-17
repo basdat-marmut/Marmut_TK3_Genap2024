@@ -39,40 +39,43 @@
             border-bottom: 1px solid #555;
             padding-bottom: 5px;
         }
+        .no-data {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 18px;
+            color: #999;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Royalty Details</h1>
+        <h1>My Royalty Details</h1>
+        {% if royalty_data %}
         <table>
             <thead>
                 <tr>
-                    <th>Song Title</th>
-                    <th>Album Title</th>
-                    <th>Total Plays</th>
-                    <th>Total Downloads</th>
-                    <th>Total Royalties</th>
+                    <th>Song</th>
+                    <th>Album</th>
+                    <th>Total Play</th>
+                    <th>Total Download</th>
+                    <th>Total Royalties Earned (in Rp)</th>
                 </tr>
             </thead>
             <tbody>
-                <!-- Example Static Content, replace with dynamic server-side data -->
+                {% for royalty in royalty_data %}
                 <tr>
-                    <td>Lagu1</td>
-                    <td>Album1</td>
-                    <td>150</td>
-                    <td>75</td>
-                    <td>Rp 450,000</td>
+                    <td>{{ royalty.judul_lagu }}</td>
+                    <td>{{ royalty.judul_album }}</td>
+                    <td>{{ royalty.total_play }}</td>
+                    <td>{{ royalty.total_download }}</td>
+                    <td>Rp {{ royalty.total_royalty_didapat }}</td>
                 </tr>
-                <tr>
-                    <td>Lagu2</td>
-                    <td>Album2</td>
-                    <td>200</td>
-                    <td>100</td>
-                    <td>Rp 600,000</td>
-                </tr>
-                <!-- Continue with other songs -->
+                {% endfor %}
             </tbody>
         </table>
+        {% else %}
+        <div class="no-data">No royalty to show</div>
+        {% endif %}
     </div>
 </body>
 </html>

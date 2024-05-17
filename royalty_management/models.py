@@ -45,3 +45,6 @@ class Label(models.Model):
     def __str__(self):
         return self.name
 
+class Royalty(models.Model):
+    artists = models.ForeignKey(Artist, on_delete=models.CASCADE)
+    total_royalty = models.DecimalField(max_digits=10, decimal_places=2)

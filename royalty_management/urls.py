@@ -1,11 +1,11 @@
 from django.urls import path
 from .views import (
-    manage_song_label, view_royalties, manage_song, create_album, view_album, add_song_to_album,
+    manage_song_label, view_royalty, manage_song, create_album, view_album, add_song_to_album,
     list_albums_label, view_album_label, delete_album_label, delete_song_label
 )
 
 urlpatterns = [
-    path('view_royalties/', view_royalties, name='view_royalties'),
+    path('view_royalty/', view_royalty, name='view_royalty'),
     path('manage_song/', manage_song, name='manage_song'),
     path('manage_song_label/', manage_song_label, name='manage_song_label'),
     path('create_album/', create_album, name='create_album'),
