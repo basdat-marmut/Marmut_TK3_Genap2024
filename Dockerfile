@@ -29,4 +29,4 @@ RUN chown -R django:django /app
 USER django
 
 # Run application
-# CMD gunicorn marmut.wsgi:application
+CMD ["gunicorn", "marmut.wsgi:application", "--bind", "0.0.0.0:$PORT"]
