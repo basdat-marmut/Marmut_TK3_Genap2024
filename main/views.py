@@ -18,8 +18,12 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login
 from .models import UserProfile, LabelProfile
 from django.contrib.auth.hashers import make_password
-
 from django.contrib.auth.models import User
+from connector.query import query, get_session_info
+import uuid
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+
 
 def get_user_type(user):
     try:
@@ -45,45 +49,116 @@ def show_main(request):
 
 def register_user(request):
     if request.method == 'POST':
-        username = request.POST.get('email')
-        password = make_password(request.POST.get('password'))
-        user = User.objects.create(username=username, email=username, password=password)
-        
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        name = request.POST.get('name')
+        gender = 1 if request.POST.get('gender') == "male" else 0
+        birth_place = request.POST.get('birthplace')
         birth_date = request.POST.get('birthdate')
         city = request.POST.get('city')
-        is_artist = 'Artist' in request.POST.get('role', [])
-        is_songwriter = 'Songwriter' in request.POST.get('role', [])
-        is_podcaster = 'Podcaster' in request.POST.get('role', [])
+        is_artist = 'True' in request.POST.get('is_artist')
+        is_songwriter = 'True' in request.POST.get('is_songwriter')
+        is_podcaster = 'True' in request.POST.get('is_podcaster')
         
-        UserProfile.objects.create(
-            user=user,
-            birth_date=birth_date,
-            city=city,
-            is_artist=is_artist,
-            is_songwriter=is_songwriter,
-            is_podcaster=is_podcaster
-        )
+        #CEK APAKAH EMAIL SUDAH TERDAFTAR
+        email_exists = query(f"SELECT * FROM AKUN WHERE email = '{email}' UNION SELECT * FROM LABEL WHERE email = '{email}'")
+        if len(email_exists)!=0:
+            messages.error(request, 'Email already registered!')
+            return redirect('main:register_label')
         
-        login(request, user)  # Automatically log in the new user
-        return redirect('main:home')  # Redirect to a home or profile page
+        is_verified = is_artist or is_songwriter or is_podcaster 
+        pemilik_hak_cipta_id = str(uuid.uuid4())
+
+        query_string = f"""
+                INSERT INTO AKUN (email, password, nama, gender, tempat_lahir, tanggal_lahir, is_verified, kota_asal)
+                VALUES ('{email}', '{password}', '{name}', {gender}, '{birth_place}', '{birth_date}', {is_verified}, '{city}');
+            """
+
+        query_string += f"""
+            INSERT INTO NONPREMIUM (email) VALUES ('{email}');
+        """
+        
+        if is_podcaster:
+            query_string += f"""
+                INSERT INTO PODCASTER (email)
+                VALUES ('{email}');
+            """
+        
+        if is_artist or is_songwriter:
+            # Insert pemilik hak cipta
+            rate_royalti = 0
+            query_string += f"""
+                INSERT INTO PEMILIK_HAK_CIPTA (id, rate_royalti)
+                VALUES ('{pemilik_hak_cipta_id}', {rate_royalti});
+            """
+
+        if is_artist:
+            artist_uuid = str(uuid.uuid4())
+            
+            # Insert artist
+            query_string += f"""
+                INSERT INTO ARTIST (id, email_akun, id_pemilik_hak_cipta)
+                VALUES ('{artist_uuid}', '{email}', '{pemilik_hak_cipta_id}');
+            """
+            
+        if is_songwriter:
+            songwriter_uuid = str(uuid.uuid4())
+            
+            
+            query_string += f"""
+                INSERT INTO SONGWRITER (id, email_akun, id_pemilik_hak_cipta)
+                VALUES ('{songwriter_uuid}', '{email}', '{pemilik_hak_cipta_id}');
+            """
+
+        res = query(query_string)
+
+        
+        if "error" in str(res):
+            messages.error(request, 'An error occurred while registering your account. Please try again later.')
+            print(res)
+        else:
+            messages.success(request, 'Registration successful!')
+            return redirect('main:login')  
 
     return render(request, 'register_user.html')
 
 def register_label(request):
     if request.method == 'POST':
-        username = request.POST.get('email')
-        password = make_password(request.POST.get('password'))
-        user = User.objects.create(username=username, email=username, password=password)
-        
+        email = request.POST.get('email')
+        password = request.POST.get('password')
         contact = request.POST.get('contact')
+        name = request.POST.get('name')
+        label_uuid = str(uuid.uuid4())
+        pemilik_hak_cipta_id = str(uuid.uuid4())
         
-        LabelProfile.objects.create(
-            user=user,
-            contact=contact
-        )
+        #CEK APAKAH EMAIL SUDAH TERDAFTAR
+        email_exists = query(f"SELECT * FROM AKUN WHERE email = '{email}' UNION SELECT * FROM LABEL WHERE email = '{email}'")
+        if len(email_exists)!=0:
+            messages.error(request, 'Email already registered!')
+            return redirect('main:register_label')
         
-        login(request, user)  # Automatically log in the new user
-        return redirect('main:home')  # Redirect to a home or profile page
+
+        # Insert pemilik hak cipta
+        rate_royalti = 0
+        query_string = f"""
+            INSERT INTO PEMILIK_HAK_CIPTA (id, rate_royalti)
+            VALUES ('{pemilik_hak_cipta_id}', {rate_royalti});
+        """
+
+        # Insert label
+        query_string += f"""
+                INSERT INTO label (id, nama, email, password, kontak, id_pemilik_hak_cipta) VALUES
+                ('{label_uuid}', '{name}', '{email}', '{password}', '{contact}', '{pemilik_hak_cipta_id}');
+        """
+
+        res = query(query_string)
+
+        if "error" in str(res):
+            messages.error(request, 'An error occurred while registering your account. Please try again later.')
+            print(res)
+        else:
+            messages.success(request, 'Registration successful!')
+            return redirect('main:login')  # Redirect to a home or profile page
 
     return render(request, 'register_label.html')
 
@@ -96,22 +171,42 @@ def login_and_register(request):
 
 def login_user(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
+        email = request.POST.get('email')
         password = request.POST.get('password')
-        user = authenticate(request, username=username, password=password)
-        if user:
-            login(request, user)
-            response = redirect('main:show_main')
-            response.set_cookie('last_login', str(datetime.datetime.now()))  # Set the time of last login
-            return response
+        user = query(f"SELECT * FROM AKUN WHERE email = '{email}' AND password = '{password}' UNION SELECT * FROM LABEL WHERE email = '{email}' AND password = '{password}'")
+        if len(user) == 0:
+            
+            messages.error(request, 'Invalid email or password!')
         else:
-            messages.error(request, 'Invalid username or password')
+            #menentukan user type
+
+            is_artist = len(query(f"SELECT * FROM ARTIST WHERE email_akun = '{email}'")) != 0
+            is_songwriter = len(query(f"SELECT * FROM SONGWRITER WHERE email_akun = '{email}'")) != 0
+            is_podcaster = len(query(f"SELECT * FROM PODCASTER WHERE email = '{email}'")) != 0
+            is_premium = len(query(f"SELECT * FROM PREMIUM WHERE email = '{email}'")) != 0
+            is_label = len(query(f"SELECT * FROM LABEL WHERE email = '{email}'")) != 0
+            
+
+            session_id = str(uuid.uuid4())
+            temp = query(f"""INSERT INTO SESSIONS (session_id, email, is_label, is_premium, is_artist, is_songwriter, is_podcaster) 
+                  VALUES ('{session_id}', '{email}' , {is_label}, {is_premium}, {is_artist}, {is_songwriter}, {is_podcaster})
+                """)
+
+
+            response = redirect('main:dashboard')
+            response.set_cookie('session_id', session_id)
+            return response
+
     return render(request, 'login.html')
 
 def logout_user(request):
-    logout(request)
+    session_id = request.COOKIES.get('session_id')
+    if session_id:
+        query(f"DELETE FROM SESSIONS WHERE session_id = '{session_id}'")  # Delete session from database
+
+
     response = HttpResponseRedirect(reverse('main:login'))
-    response.delete_cookie('last_login')
+    response.delete_cookie('session_id')  # Delete session_id cookie
     return response
 
 
@@ -235,18 +330,27 @@ def home(request):
     #redirect to login and register
     return redirect('main:login_and_register')
 
-from django.shortcuts import render
-from datetime import datetime, timedelta
-
 def dashboard(request):
+    # Get user from session
+    ses_info = get_session_info(request)
+    email = ses_info['email']
+    if not email:
+        return redirect('main:login')
+    
+    user = query(f"SELECT * FROM AKUN WHERE email = '{email}'")[0]
+    if ses_info['is_label']:
+        user = query(f"SELECT * FROM LABEL WHERE email = '{email}'")[0]
+    # print(ses_info)
+    # print("user : ", user)
     # Dummy data untuk pengguna
+    # TODO: HANDLE 
     user = {
-        'name': 'John Doe',
-        'email': 'john@example.com',
-        'city': 'New York',
-        'gender': 'Male',
-        'birth_place': 'Los Angeles',
-        'birth_date': '1990-05-15',
+        'name': user['nama'],
+        'email': user['email'],
+        'city': user['kota_asal'],
+        'gender': user['gender'],
+        'birth_place': user['tempat_lahir'],
+        'birth_date': user['tanggal_lahir'],
         'role': 'Regular User',
         'playlists': [
             {
