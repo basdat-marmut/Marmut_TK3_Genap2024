@@ -170,14 +170,11 @@ def login_user(request):
         if len(user) == 0:
             messages.error(request, 'Invalid email or password!')
         else:
-            #menentukan user type
-
             is_artist = len(query(f"SELECT * FROM ARTIST WHERE email_akun = '{email}'")) != 0
             is_songwriter = len(query(f"SELECT * FROM SONGWRITER WHERE email_akun = '{email}'")) != 0
             is_podcaster = len(query(f"SELECT * FROM PODCASTER WHERE email = '{email}'")) != 0
             is_premium = len(query(f"SELECT * FROM PREMIUM WHERE email = '{email}'")) != 0
             is_label = len(query(f"SELECT * FROM LABEL WHERE email = '{email}'")) != 0
-            
 
             session_id = str(uuid.uuid4())
             temp = query(f"""INSERT INTO SESSIONS (session_id, email, is_label, is_premium, is_artist, is_songwriter, is_podcaster) 
@@ -391,14 +388,51 @@ def shuffle_playlist(request, id):
 
 
 def search(request):
+    query_str = request.GET.get('query')
     pass
 #     query = request.GET.get('query')
     
+    if query_str:
+        songs = query(f"""
+            SELECT k.id, k.judul AS title, string_agg(distinct g.genre, ', ') AS genre, ak.nama AS artist_name
+            FROM KONTEN k
+            JOIN SONG s ON k.id = s.id_konten
+            JOIN GENRE g ON k.id = g.id_konten
+            JOIN ARTIST a ON s.id_artist = a.id
+            JOIN AKUN ak ON a.email_akun = ak.email
+            WHERE k.judul ILIKE '%{query_str}%'
+            GROUP BY k.id, k.judul, ak.nama
+        """)
+        
+        user_playlists = query(f"""
+            SELECT up.id_user_playlist, up.judul AS title, up.email_pembuat AS creator_email, ak.nama AS creator_name
+            FROM USER_PLAYLIST up
+            JOIN AKUN ak ON up.email_pembuat = ak.email
+            WHERE up.judul ILIKE '%{query_str}%'
+        """)
 #     if query:
 #         songs = Song.objects.filter(title__icontains=query)
 #         podcasts = podcast.objects.filter(title__icontains=query)
 #         user_playlists = UserPlaylist.objects.filter(title__icontains=query)
         
+        results = []
+        for song in songs:
+            results.append({
+                'type': 'SONG',
+                'title': song['title'],
+                'genre': song['genre'],
+                'by': song['artist_name'],
+                'url': reverse('song_detail', args=[song['id']])
+            })
+        for playlist in user_playlists:
+            results.append({
+                'type': 'USER PLAYLIST',
+                'title': playlist['title'],
+                'by': playlist['creator_name'],
+                'url': reverse('playlist_detail', args=[playlist['id_user_playlist'], playlist['creator_email']])
+            })
+    else:
+        results = []
 #         results = []
 #         for song in songs:
 #             results.append({
@@ -424,6 +458,11 @@ def search(request):
 #     else:
 #         results = []
     
+    context = {
+        'query': query_str,
+        'results': results
+    }
+    return render(request, 'search_results.html', context)
 #     context = {
 #         'query': query,
 #         'results': results
@@ -440,8 +479,6 @@ def createpod(request):
 def createpodepisode(request):
     # Logika untuk menampilkan halaman createpod.html
     return render(request, 'createpod_episode.html')
-
-
 
 def seechart(request):
     # Logika untuk menampilkan halaman createpod.html

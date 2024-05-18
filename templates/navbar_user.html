@@ -58,6 +58,11 @@
                     </li>
                 {% endif %}
             </ul>
+            <form class="d-flex" action="{% url 'main:search' %}" method="get">
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="query">
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
+            {% if user_type == 'guest' %}
             {% if navbar.is_guest %}
                 <form class="d-flex">
                     <button class="btn btn-pink me-2" type="button" onclick="location.href='{% url 'main:login' %}'">Login</button>

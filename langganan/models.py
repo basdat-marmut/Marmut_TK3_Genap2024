@@ -6,7 +6,7 @@ class Paket(models.Model):
     harga = models.IntegerField()
 
 class Transaction(models.Model):
-    id = models.UUIDField(primary_key=True)
+    id = models.BigAutoField(primary_key=True)
     jenis_paket = models.ForeignKey(Paket, on_delete=models.CASCADE)
     email = models.ForeignKey(User, on_delete=models.CASCADE)
     timestamp_dimulai = models.DateTimeField()

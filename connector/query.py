@@ -25,25 +25,19 @@ def map_cursor(cursor):
     nt_result = namedtuple("Result", [col[0] for col in desc])
     return [dict(row) for row in cursor.fetchall()]
 
-
 def query(query_str: str):
     hasil = []
     with connection.cursor(cursor_factory=RealDictCursor) as cursor:
         cursor.execute("SET SEARCH_PATH TO PUBLIC")
         try:
             cursor.execute(query_str)
-
             if query_str.strip().upper().startswith("SELECT"):
-                # Kalau ga error, return hasil SELECT
                 hasil = map_cursor(cursor)
             else:
-                # Kalau ga error, return jumlah row yang termodifikasi oleh INSERT, UPDATE, DELETE
                 hasil = cursor.rowcount
                 connection.commit()
         except Exception as e:
-            # Ga tau error apa
             hasil = "error :\n" + str(e)
-
     return hasil
 
 def get_session_info(request):

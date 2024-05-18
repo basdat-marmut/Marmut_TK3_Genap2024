@@ -1,28 +1,42 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container">
-    <h2>Daftar Lagu yang Diunduh</h2>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Judul</th>
-                <th>Artist</th>
-                <th>Album</th>
-                <th>Tanggal Unduh</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for song in songs %}
-                <tr>
-                    <td>{{ song.song.title }}</td>
-                    <td>{{ song.song.artist }}</td>
-                    <td>{{ song.song.album }}</td>
-                    <td>{{ song.timestamp|date:"d/m/y H:i" }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <a href="{% url 'song_list' %}" class="btn btn-secondary">Kembali</a>
-</div>
+<h2>DAFTAR LAGU</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Judul Lagu</th>
+            <th>Oleh</th>
+            <th>Tanggal Download</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for downloaded_song in downloaded_songs %}
+        <tr>
+            <td>{{ downloaded_song.song.title }}</td>
+            <td>{{ downloaded_song.song.artist }}</td>
+            <td>{{ downloaded_song.timestamp|date:"d/m/Y" }}</td>
+            <td>
+                <a href="{% url 'song_detail' downloaded_song.song.id %}">Lihat</a>
+                <form method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="song_id" value="{{ downloaded_song.song.id }}">
+                    <button type="submit">Hapus</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{% url 'song_list' %}">Kembali</a>
+
+{% if messages %}
+    {% for message in messages %}
+    <p>{{ message }}</p>
+    {% endfor %}
+{% endif %}
+
 {% endblock %}
