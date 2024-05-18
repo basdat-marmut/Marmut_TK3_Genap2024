@@ -2,25 +2,25 @@
 {% block content %}
 <!-- templates/tambah_playlist.html -->
 
-<body>
+
+<div class="container mt-4">
     {% if ubah %}
     <h1>Ubah Playlist</h1>
     <form method="post" action="{% url 'playlist_update' id  %}">
     {% else %}
     <h1>Tambah Playlist</h1>
-    <form method="post" action="{% url 'playlist_create' %}"></form>
+    <form method="post" action="{% url 'playlist_create' %}">
     {% endif %}
         {% csrf_token %}
+        
         <label for="judul">Judul:</label>
         <input type="text" id="judul" name="judul" required><br>
 
         <label for="deskripsi">Deskripsi:</label>
         <textarea id="deskripsi" name="deskripsi" required></textarea><br>
 
-        <button type="submit">Submit</button>
+        <button type="submit" class="btn btn-primary mt-3">Submit</button>
     </form>
-</body>
-
-
+</div>
 
 {% endblock %}
