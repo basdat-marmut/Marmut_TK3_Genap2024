@@ -1,42 +1,91 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container">
-    <h1>User Playlist Detail</h1>
-    <p>Judul: {{ playlist.name }}</p>
-    <p>Pembuat: {{ playlist.user.username }}</p>
-    <p>Jumlah Lagu: {{ songs.count }}</p>
-    <p>Total Durasi: {{ playlist.total_duration }}</p>
-    <p>Tanggal Dibuat: {{ playlist.created_at|date:"d/m/y" }}</p>
-    <p>Deskripsi: {{ playlist.description }}</p>
-    <a href="#" class="btn btn-primary">Shuffle Play</a>
-    <a href="{% url 'playlist_list' %}" class="btn btn-secondary">Kembali</a>
+<div class="container mt-4">
+    <div class="card bg-dark text-white">
+        <div class="card-header">
+            <h1>{{ playlist.title }}</h1>
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">Created by: {{ playlist.creator }}</h5>
+            <p class="card-text"><strong>Number of Songs:</strong> {{ playlist.songs|length }}</p>
+            <p class="card-text"><strong>Total Duration:</strong> {{ playlist.total_duration_hours }} hours {{ playlist.total_duration_minutes }} minutes</p>
+            <p class="card-text"><strong>Created On:</strong> {{ playlist.created_date }}</p>
+            <p class="card-text"><strong>Description:</strong> {{ playlist.description }}</p>
+            
+            <button class="btn btn-primary mt-2" onclick="shufflePlay()">Shuffle Play</button>
+        </div>
+        <div class="card-footer text-muted">
+            <a class="btn btn-outline-light" onclick="window.history.back()">Back</a>
+        </div>
+    </div>
 
-    <h2>Daftar Lagu</h2>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Judul Lagu</th>
-                <th>Oleh</th>
-                <th>Durasi</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for song in songs %}
+    <div class="table-responsive mt-4">
+        <table class="table table-dark table-striped">
+            <thead>
                 <tr>
-                    <td>{{ song.song.title }}</td>
-                    <td>{{ song.song.artist }}</td>
-                    <td>{{ song.song.duration }}</td>
+                    <th>Title</th>
+                    <th>Artist</th>
+                    <th>Duration</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for song in playlist.songs %}
+                <tr>
+                    <td>{{ song.title }}</td>
+                    <td>{{ song.artist }}</td>
+                    <td>{{ song.duration }} minutes</td>
                     <td>
-                        <a href="#" class="btn btn-info btn-sm">Lihat</a>
-                        <a href="#" class="btn btn-success btn-sm">Play</a>
-                        <a href="{% url 'remove_song_from_playlist' playlist.id song.song.id %}" class="btn btn-danger btn-sm">Hapus</a>
+                        <a class="btn btn-sm btn-secondary" href="{% url 'main:play_song' id=song.id_song %}">View</a>
+                        <button class="btn btn-sm btn-info" onclick="playSong(`{% url 'main:user_play_song' id=song.id_song %}`)">Play</button>
+                        <button class="btn btn-sm btn-danger" onclick="removeSong(`{% url 'remove_song_from_playlist' playlist_id=playlist.id song_id=song.id_song %}`)">Remove</button>
                     </td>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <a href="{% url 'add_song_to_playlist' playlist.id %}" class="btn btn-primary">Tambah Lagu</a>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="{% url 'add_song_to_playlist' playlist_id=playlist.id %}" class="btn btn-primary">
+            Tambah Lagu
+        </a>
+    </div>
 </div>
+
+<script>
+    function playSong(id) {
+        fetch(id).then(response => {
+            if (response.ok) {
+                alert('Song is playing!');
+            }
+            else{
+                alert('Failed to play song!');
+            }
+        }, networkError => console.log(networkError))
+        
+    }
+
+    function shufflePlay() {
+        fetch("{% url 'main:shuffle_playlist' id=playlist.id %}").then(response => {
+            if (response.ok) {
+                alert('Shuffle play started!');
+            }
+            else{
+                alert('Failed to start shuffle play!');
+            }
+        }, networkError => console.log(networkError))
+    }
+    function removeSong(id) {
+        fetch(id).then(response => {
+            if (response.ok) {
+                alert('Song is removed from playlist!');
+                location.reload();
+            }
+            else{
+                alert('Song is not removed from playlist!');
+            }
+        }, networkError => console.log(networkError))
+        
+    }
+</script>
+
 {% endblock %}

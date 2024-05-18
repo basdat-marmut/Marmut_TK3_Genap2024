@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 
 {% block content %}
-{% include 'navbar_guest.html' %} 
 <div class="container mt-4">
     <div class="card bg-dark text-white">
         <div class="card-header">
@@ -17,7 +16,7 @@
             <button class="btn btn-primary mt-2" onclick="shufflePlay()">Shuffle Play</button>
         </div>
         <div class="card-footer text-muted">
-            <a  class="btn btn-outline-light">Back</a>
+            <a class="btn btn-outline-light" onclick="window.history.back()">Back</a>
         </div>
     </div>
 
@@ -36,10 +35,10 @@
                 <tr>
                     <td>{{ song.title }}</td>
                     <td>{{ song.artist }}</td>
-                    <td>{{ song.duration }}</td>
+                    <td>{{ song.duration }} minutes</td>
                     <td>
-                        <a class="btn btn-sm btn-secondary">View</a>
-                        <button class="btn btn-sm btn-info" >Play</button>
+                        <a class="btn btn-sm btn-secondary" href="{% url 'main:play_song' id=song.id_song %}">View</a>
+                        <button class="btn btn-sm btn-info" onclick="playSong(`{% url 'main:user_play_song' id=song.id_song %}`)">Play</button>
                     </td>
                 </tr>
                 {% endfor %}
@@ -47,5 +46,30 @@
         </table>
     </div>
 </div>
+
+<script>
+    function playSong(id) {
+        fetch(id).then(response => {
+            if (response.ok) {
+                alert('Song is playing!');
+            }
+            else{
+                alert('Failed to play song!');
+            }
+        }, networkError => console.log(networkError))
+        
+    }
+
+    function shufflePlay() {
+        fetch("{% url 'main:shuffle_playlist' id=playlist.id %}").then(response => {
+            if (response.ok) {
+                alert('Shuffle play started!');
+            }
+            else{
+                alert('Failed to start shuffle play!');
+            }
+        }, networkError => console.log(networkError))
+    }
+</script>
 
 {% endblock %}

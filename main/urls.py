@@ -13,6 +13,7 @@ from main.views import weekly
 from main.views import monthly
 from main.views import yearly
 from main.views import podetail
+from main.views import download_song, add_song_to_playlist, user_play_song, shuffle_playlist
 
 app_name = 'main'
 
@@ -22,8 +23,8 @@ urlpatterns = [
     path('login/', login_user, name='login'),
     path('logout/', logout_user, name='logout'),
     path('search/', search, name='search'),
-    path('play-song/', play_song, name='play_song'),
-    path('play-user-playlist/', play_user_playlist, name='play_user_playlist'),
+    path('play-song/<str:id>/', play_song, name='play_song'),
+    path('play-user-playlist/<str:id>/', play_user_playlist, name='play_user_playlist'),    
     path('createpod.html/', createpod, name='createpod'),
     path('createpod.html/createpod_episode.html/', createpodepisode, name='createpodepisode'),
     path('podetail.html/', podetail, name='podetail'),
@@ -37,4 +38,8 @@ urlpatterns = [
     path('home/', home, name='home'),
     path('login_and_register/', login_and_register, name='login_and_register'),
     path('dashboard/', dashboard, name='dashboard'),
+    path('download-song/<str:id>/', download_song, name='download_song'),
+    path('add-song-to-playlist/', add_song_to_playlist, name='add_song_to_playlist'),
+    path('user-play-song/<str:id>/', user_play_song, name='user_play_song'),
+    path('shuffle-playlist/<str:id>/', shuffle_playlist, name='shuffle_playlist')
 ]

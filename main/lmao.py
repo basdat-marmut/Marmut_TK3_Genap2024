@@ -47,8 +47,56 @@ def query(query_str: str):
     return hasil
 
 email = "ganjar@pranowo.com"
-email_exists = query(f"SELECT * FROM AKUN WHERE email = '{email}' UNION SELECT * FROM LABEL WHERE email = '{email}'")
-if email_exists:
-    print("Email belum terdaftar")
-else:
-    print("Email sudah terdaftar")
+id_konten = "f178a9c2-9054-4fe2-8972-77abc0998131"
+# email_exists = query(f"""
+#     SELECT * FROM 
+#         (SELECT * FROM SONG WHERE id_konten = '{id_konten}') AS LAGU 
+#         NATURAL JOIN 
+#         (SELECT judul AS judul_lagu, tanggal_rilis, tahun, durasi FROM KONTEN WHERE id = '{id_konten}') AS CONTENT
+#         JOIN
+#         (SELECT id AS album_id, judul AS judul_album FROM ALBUM) AS ALBUM ON LAGU.id_album = ALBUM.album_id
+#         JOIN 
+#         (SELECT id AS artist_id, email_akun FROM ARTIST) AS ARTIST ON LAGU.id_artist = ARTIST.artist_id
+#         JOIN
+#         (SELECT email, nama FROM AKUN) AS AKUN ON ARTIST.email_akun = AKUN.email;
+#     """)
+# print(email_exists)
+# songwriters = query(f"""
+#     SELECT nama FROM AKUN WHERE email IN 
+#         (SELECT email_akun FROM SONGWRITER WHERE id IN
+#             (SELECT id_songwriter FROM SONGWRITER_WRITE_SONG WHERE id_song = '{id_konten}')
+#         )
+# """)
+
+# print(songwriters)
+
+# songwriters = [sw['nama'] for sw in songwriters]
+
+# print(songwriters)
+
+id_user_playlist = "05a104c1-e02b-4dff-bfc1-d52c92ba6ed2"
+query_string = f"""
+    SELECT *
+    FROM USER_PLAYLIST up
+    JOIN AKUN a ON up.email_pembuat = a.email
+    WHERE up.id_user_playlist = '{id_user_playlist}';        
+"""
+playlist = query(query_string)[0]
+# query_string = f"""
+#     SELECT * FROM 
+#     (SELECT * FROM SONG WHERE id_konten IN
+#         (SELECT id_song FROM PLAYLIST_SONG WHERE id_playlist = '{playlist['id_playlist']}')) AS LAGU
+#     JOIN
+#     (SELECT id, judul AS judul_lagu, tanggal_rilis, tahun, durasi FROM KONTEN) AS CONTENT
+#     ON LAGU.id_konten = CONTENT.id
+#     JOIN
+#     (SELECT id AS artist_id, email_akun FROM ARTIST) AS ARTIST ON LAGU.id_artist = ARTIST.artist_id
+        
+# """
+# songs = query(query_string)
+# for song in songs:
+#     print(song)
+#     print("=========")
+# print(len(songs))
+print(playlist)
+print([1,2,3]+[4,5,6])

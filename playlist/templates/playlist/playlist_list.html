@@ -8,6 +8,8 @@
             <thead>
                 <tr>
                     <th>Judul</th>
+                    <th>Deskripsi</th>
+                    <th>Tanggal Dibuat</th>
                     <th>Jumlah Lagu</th>
                     <th>Total Durasi</th>
                     <th>Action</th>
@@ -17,8 +19,10 @@
                 {% for playlist in playlists %}
                     <tr>
                         <td>{{ playlist.name }}</td>
-                        <td>{{ playlist.userplaylist_set.count }}</td>
-                        <td>{{ playlist.total_duration }}</td>
+                        <td>{{ playlist.description }}</td>
+                        <td>{{ playlist.tanggal_dibuat }}</td>
+                        <td>{{ playlist.jumlah_lagu }}</td>
+                        <td>{{ playlist.durasi }}</td>
                         <td>
                             <a href="{% url 'playlist_detail' playlist.id %}" class="btn btn-info btn-sm">Detail</a>
                             <a href="{% url 'playlist_update' playlist.id %}" class="btn btn-primary btn-sm">Ubah</a>
