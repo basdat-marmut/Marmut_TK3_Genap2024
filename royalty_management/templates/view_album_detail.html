@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Album Details</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #333;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            border: 1px solid #777;
+            text-align: left;
+        }
+        th {
+            background-color: #555;
+        }
+        td {
+            background-color: #444;
+        }
+        .button, a {
+            background-color: #666;
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .button:hover, a:hover {
+            background-color: #777;
+        }
+        .no-data {
+            margin-top: 20px;
+            color: #bbb;
+        }
+        h2 {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>DAFTAR LAGU PADA {{ album.judul }}</h2>
+        {% if songs %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Judul</th>
+                    <th>Durasi</th>
+                    <th>Total Play</th>
+                    <th>Total Download</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for song in songs %}
+                <tr>
+                    <td>{{ song.judul }}</td>
+                    <td>{{ song.durasi }} menit</td>
+                    <td>{{ song.total_play }}</td>
+                    <td>{{ song.total_download }}</td>
+                    <td>
+                        <a href="{% url 'view_song_detail' song.id_konten %}" class="button">Lihat Detail</a>
+                        <form action="{% url 'delete_song' song.id_konten %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="button">Hapus</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="no-data">No songs in this album.</div>
+        {% endif %}
+    </div>
+</body>
+</html>

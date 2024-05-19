@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Albums</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #333;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            border: 1px solid #777;
+            text-align: left;
+        }
+        th {
+            background-color: #555;
+        }
+        td {
+            background-color: #444;
+        }
+        .button {
+            background-color: #666;
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .button:hover {
+            background-color: #777;
+        }
+        .no-data {
+            margin-top: 20px;
+            color: #bbb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>List of Albums</h2>
+        {% if albums %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Label</th>
+                    <th>Song Count</th>
+                    <th>Total Duration</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for album in albums %}
+                <tr>
+                    <td>{{ album.judul }}</td>
+                    <td>{{ album.id_label }}</td>
+                    <td>{{ album.jumlah_lagu }}</td>
+                    <td>{{ album.total_durasi }}</td>
+                    <td>
+                        <a href=# class="button">View</a>
+                        <form action=# method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="button">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="no-data">You don't have any albums</div>
+        {% endif %}
+    </div>
+</body>
+</html>
