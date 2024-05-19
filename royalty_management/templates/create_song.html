@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Song</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #333;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+        }
+        form {
+            background-color: #444;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        label {
+            color: #ccc;
+        }
+        select, input[type="text"], input[type="number"], .checkbox-group {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #555;
+            color: #fff;
+        }
+        .checkbox-group {
+            padding: 10px;
+            background-color: #444;
+            border: 1px solid #777;
+            border-radius: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .checkbox-group label {
+            display: block;
+            margin: 5px 0;
+        }
+        input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        button {
+            background-color: #666;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #777;
+        }
+        .container {
+            width: 90%;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Create Song for Album: {{ album_title }}</h2>
+        <form action="" method="post">
+            {% csrf_token %}
+            <label for="judul_lagu">Judul Lagu:</label>
+            <input type="text" id="judul_lagu" name="judul_lagu" required>
+
+            {% if is_artist %}
+                <label for="artist">Artist:</label>
+                <input type="text" id="artist" name="artist" value="{{ user_name }} ({{ user_email }})" readonly>
+            {% elif is_songwriter %}
+                <label for="songwriter">Songwriter:</label>
+                <input type="text" id="songwriter" name="songwriter" value="{{ user_name }} ({{ user_email }})" readonly>
+                
+                <label for="co_songwriters">Co-Songwriter(s):</label>
+                <select id="co_songwriters" name="songwriters" multiple required>
+                    {% for songwriter in songwriters %}
+                        {% if songwriter.email != user_email %}
+                            <option value="{{ songwriter.id }}">{{ songwriter.nama }} ({{ songwriter.email }})</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            {% endif %}
+
+            <label for="genres">Genre:</label>
+            <div class="checkbox-group" id="genres">
+                {% for genre in genres %}
+                    <label><input type="checkbox" name="genres" value="{{ genre.genre }}">{{ genre.genre }}</label>
+                {% endfor %}
+            </div>
+
+            <label for="durasi">Durasi (menit):</label>
+            <input type="number" id="durasi" name="durasi" required>
+
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</body>
+</html>

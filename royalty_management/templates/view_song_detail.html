@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Song Details</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #333;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            width: 90%;
+            margin: auto;
+        }
+        h2 {
+            border-bottom: 1px solid #555;
+            padding-bottom: 5px;
+            margin-bottom: 20px;
+        }
+        p {
+            margin: 10px 0;
+        }
+        .button {
+            background-color: #666;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .button:hover {
+            background-color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Song Details: {{ song.judul }}</h2>
+        <p><strong>Artist:</strong> {{ song.id_artist }}</p>
+        <p><strong>Album:</strong> {{ song.id_album }}</p>
+        <p><strong>Duration:</strong> {{ song.durasi }} menit</p>
+        <p><strong>Total Play:</strong> {{ song.total_play }}</p>
+        <p><strong>Total Download:</strong> {{ song.total_download }}</p>
+        <a href="{% url 'view_album_detail' song.id_album %}" class="button">Back to Album</a>
+    </div>
+</body>
+</html>

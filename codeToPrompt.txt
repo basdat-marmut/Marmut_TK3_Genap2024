@@ -1,269 +1,5 @@
 ini adalah kode sekarang:
 
-templates\base.html:
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Marmut</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body, .form-label, .btn {
-            background-color: #121212; 
-            color: #fff; 
-        }
-        h2 {
-            color: #fff; 
-        }
-        .form-box {
-            background-color: #333;
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #444;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-        }
-        .btn-pink {
-            background-color: #ff007f; 
-            border-color: #ff007f;
-        }
-        .btn-pink:hover {
-            background-color: #e60074;
-            border-color: #cc0066;
-        }
-        .btn-cyan {
-            background-color: #00ffff; 
-            border-color: #00ffff;
-        }
-        .btn-cyan:hover {
-            background-color: #00e5e5;
-            border-color: #00cccc;
-        }
-        .form-control {
-            background-color: #222;
-            border: 1px solid #555;
-            color: #fff;
-        }
-        .form-control:focus {
-            box-shadow: 0 0 0 0.25rem rgba(0, 255, 255, 0.25);
-            border-color: #00ffff;
-        }
-    </style>
-</head>
-<body>
-    {% include 'navbar_user.html' %}
-
-    <div class="container mt-4">
-        {% block content %}{% endblock %}
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
-
-
-templates\navbar_guest.html:
-<nav class="navbar navbar-expand-md navbar-dark bg-dark-custom">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="#">Marmut</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarCollapse">
-            <ul class="navbar-nav me-auto mb-2 mb-md-0">
-                <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="#">Home</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Pricing</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'playlist_list' %}">Kelola Playlist</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'langganan_paket' %}">Langganan Paket</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'song_list' %}">Daftar Lagu</a>
-                </li>
-                <li>
-                    <form class="d-flex" action="{% url 'main:search' %}" method="get">
-                        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="query">
-                        <button class="btn btn-outline-success" type="submit">Search</button>
-                    </form>
-                </li>                
-            </ul>
-            <form class="d-flex">
-                <a href="{% url 'main:login' %}" class="btn btn-pink me-2" type="submit">Login</a>
-                <a href="{% url 'main:register' %}" class="btn btn-cyan" type="submit">Register</a>
-            </form>
-        </div>
-    </div>
-</nav>
-
-
-templates\navbar_user.html:
-<nav class="navbar navbar-expand-md navbar-dark bg-dark-custom">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="{% url 'main:home' %}">Mahmud</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarCollapse">
-            <ul class="navbar-nav me-auto mb-2 mb-md-0">
-                {% if user_type != 'guest' %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'main:dashboard' %}">Dashboard</a>
-                    </li>
-                    {% if user_type == 'user' or user_type == 'artist' or user_type == 'songwriter' or user_type == 'podcaster' %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Chart</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Kelola Playlist</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'langganan:langganan_paket' %}">Langganan Paket</a>
-                        </li>
-                        
-                    {% endif %}
-                    {% if user_type == 'premium' %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Kelola Downloaded Songs</a>
-                        </li>
-                    {% endif %}
-                    {% if user_type == 'podcaster' %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Kelola Podcast</a>
-                        </li>
-                    {% endif %}
-                    {% if user_type == 'artist' or user_type == 'songwriter' %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Kelola Album & Songs</a>
-                        </li>
-                    {% endif %}
-                    {% if user_type == 'label' %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Kelola Album</a>
-                        </li>
-                    {% endif %}
-                    {% if user_type == 'artist' or user_type == 'songwriter' or user_type == 'label' %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Cek Royalti</a>
-                        </li>
-                    {% endif %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'main:logout' %}">Logout</a>
-                    </li>
-                {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link active" href="{% url 'main:home' %}">Home</a>
-                    </li>
-                {% endif %}
-            </ul>
-            <form class="d-flex" action="{% url 'main:search' %}" method="get">
-                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="query">
-                <button class="btn btn-outline-success" type="submit">Search</button>
-            </form>
-            {% if user_type == 'guest' %}
-                <form class="d-flex">
-                    <button class="btn btn-pink me-2" type="button" onclick="location.href='{% url 'main:login' %}'">Login</button>
-                    <button class="btn btn-cyan" type="button" onclick="location.href='{% url 'main:register' %}'">Register</button>
-                </form>
-            {% endif %}
-        </div>
-    </div>
-</nav>
-
-
-
-templates\search_results.html:
-{% extends 'base.html' %}
-
-{% block content %}
-<h2>Hasil Pencarian "{{ query }}"</h2>
-
-{% if results %}
-    <table class="table table-dark">
-        <thead>
-            <tr>
-                <th>Tipe</th>
-                <th>Judul</th>
-                <th>Oleh</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for result in results %}
-                <tr>
-                    <td>{{ result.type }}</td>
-                    <td>{{ result.title }}</td>
-                    <td>{{ result.by }}</td>
-                    <td>
-                        <a href="{{ result.url }}" class="btn btn-sm btn-info">Lihat</a>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-{% else %}
-    <p>Maaf, pencarian untuk "{{ query }}" tidak ditemukan</p>
-{% endif %}
-{% endblock %}
-
-
-connector\query.py:
-from collections import namedtuple
-import psycopg2
-from psycopg2 import Error
-from psycopg2.extras import RealDictCursor
-from django.http import HttpRequest  # for the 'request' parameter
-
-
-try:
-    connection = psycopg2.connect(user="postgres.tutzylpjrcjropovgoly",
-                        password="eqRvUiBE4LZlukUp",
-                        host="aws-0-ap-southeast-1.pooler.supabase.com",
-                        port="5432",
-                        database="postgres")
-
-    # Create a cursor to perform database operations
-    connection.autocommit = True
-    cursor = connection.cursor()
-except (Exception, Error) as error:
-    print("Error while connecting to PostgreSQL", error)
-
-
-def map_cursor(cursor):
-    "Return all rows from a cursor as a namedtuple"
-    desc = cursor.description
-    nt_result = namedtuple("Result", [col[0] for col in desc])
-    return [dict(row) for row in cursor.fetchall()]
-
-def query(query_str: str):
-    hasil = []
-    with connection.cursor(cursor_factory=RealDictCursor) as cursor:
-        cursor.execute("SET SEARCH_PATH TO PUBLIC")
-        try:
-            cursor.execute(query_str)
-            if query_str.strip().upper().startswith("SELECT"):
-                hasil = map_cursor(cursor)
-            else:
-                hasil = cursor.rowcount
-                connection.commit()
-        except Exception as e:
-            hasil = "error :\n" + str(e)
-    return hasil
-
-def get_session_info(request):
-    session_id = request.COOKIES.get('session_id')
-    if session_id:
-        user = query(f"SELECT * FROM SESSIONS WHERE session_id = '{session_id}'")
-        if user:
-            return user[0]
-    return None
-
-
 langganan\admin.py:
 from django.contrib import admin
 
@@ -401,337 +137,301 @@ langganan\__init__.py:
 
 
 
-langganan\templates\langganan\langganan_paket.html:
-{% extends 'base.html' %}
+marmut\asgi.py:
+"""
+ASGI config for marmut project.
 
-{% block content %}
-<h2>Langganan Paket</h2>
-{% if error %}
-    <div class="alert alert-danger" role="alert">
-        {{ error }}
-    </div>
-{% endif %}
-<table class="table table-dark">
-    <thead>
-        <tr>
-            <th>Jenis</th>
-            <th>Harga</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for paket in paket_list %}
-        <tr>
-            <td>{{ paket.jenis }}</td>
-            <td>{{ paket.harga }}</td>
-            <td><a href="{% url 'langganan:pembayaran_paket' paket.jenis %}" class="btn btn-info">Berlangganan</a></td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-<a href="{% url 'langganan:riwayat_transaksi' %}" class="btn btn-secondary">Riwayat Transaksi</a>
-{% endblock %}
+It exposes the ASGI callable as a module-level variable named ``application``.
+
+For more information on this file, see
+https://docs.djangoproject.com/en/4.2/howto/deployment/asgi/
+"""
+
+import os
+
+from django.core.asgi import get_asgi_application
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "marmut.settings")
+
+application = get_asgi_application()
 
 
 
-langganan\templates\langganan\pembayaran_paket.html:
-{% extends 'base.html' %}
+marmut\settings.py:
+"""
+Django settings for marmut project.
 
-{% block content %}
-<h2>Pembayaran Paket</h2>
-<p>Informasi Paket yang Ingin Dibeli:</p>
-<table>
-    <tr>
-        <th>Jenis</th>
-        <th>Harga</th>
-    </tr>
-    <tr>
-        <td>{{ paket.jenis }}</td>
-        <td>{{ paket.harga }}</td>
-    </tr>
-</table>
-<form method="POST">
-    {% csrf_token %}
-    <label for="metode_bayar">Metode Pembayaran:</label>
-    <select name="metode_bayar" id="metode_bayar">
-        <option value="transfer_bank">Transfer Bank</option>
-        <option value="kartu_kredit">Kartu Kredit</option>
-        <option value="e_wallet">E-Wallet</option>
-    </select>
-    <br>
-    <input type="submit" value="Submit">
-</form>
-{% endblock %}
+Generated by 'django-admin startproject' using Django 4.2.4.
 
+For more information on this file, see
+https://docs.djangoproject.com/en/4.2/topics/settings/
 
+For the full list of settings and their values, see
+https://docs.djangoproject.com/en/4.2/ref/settings/
+"""
 
-langganan\templates\langganan\riwayat_transaksi.html:
-{% extends 'base.html' %}
+from pathlib import Path
+import environ # Tambahkan kode berikut
+import os # Tambahkan kode berikut
+from django.core.management.utils import get_random_secret_key
+from pathlib import Path
 
-{% block content %}
-<h2>Riwayat Transaksi Paket</h2>
-<table>
-    <tr>
-        <th>Jenis</th>
-        <th>Tanggal Dimulai</th>
-        <th>Tanggal Berakhir</th>
-        <th>Metode Pembayaran</th>
-        <th>Nominal</th>
-    </tr>
-    {% for transaksi in transaksi_list %}
-    <tr>
-        <td>{{ transaksi.jenis_paket.jenis }}</td>
-        <td>{{ transaksi.timestamp_dimulai }}</td>
-        <td>{{ transaksi.timestamp_berakhir }}</td>
-        <td>{{ transaksi.metode_bayar }}</td>
-        <td>{{ transaksi.nominal }}</td>
-    </tr>
-    {% endfor %}
-</table>
-<a href="{% url 'langganan:langganan_paket' %}">Kembali</a>
-{% endblock %}
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+env = environ.Env() # Tambahkan kode berikut
+
+# Quick-start development settings - unsuitable for production
+# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = "django-insecure-5dgque*$6nl$6wj!p#7%6b=ot92+jm@f%!(*9-2tz!3=&n&+*w"
+
+PRODUCTION = env.bool('PRODUCTION', False)
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = True
+
+ALLOWED_HOSTS = ["*"]
 
 
+# Application definition
 
-song\admin.py:
+INSTALLED_APPS = [
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "main",
+    "playlist",
+    "langganan",
+    "song",
+    "royalty_management",
+]
+
+LOGIN_URL = 'main:login'  # Change to your actual login URL
+LOGIN_REDIRECT_URL = 'main:home'  # Change to the URL you want to redirect to after login
+LOGOUT_REDIRECT_URL = 'main:login'  # Change to your actual logout redirect URL
+
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_AGE = 1209600  # Two weeks
+SESSION_SAVE_EVERY_REQUEST = True
+
+
+
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+ROOT_URLCONF = "marmut.urls"
+
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        'DIRS': [BASE_DIR / 'templates'],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ],
+        },
+    },
+]
+
+WSGI_APPLICATION = "marmut.wsgi.application"
+
+
+# Database
+# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    }
+}
+
+if PRODUCTION:
+    DATABASES = {
+        'default': env.db('DATABASE_URL')
+    }
+    DATABASES["default"]["ATOMIC_REQUESTS"] = True
+
+
+# Password validation
+# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+    },
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
+]
+
+
+# Internationalization
+# https://docs.djangoproject.com/en/4.2/topics/i18n/
+
+LANGUAGE_CODE = "en-us"
+
+TIME_ZONE = "UTC"
+
+USE_I18N = True
+
+USE_TZ = True
+
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/4.2/howto/static-files/
+
+STATIC_URL = "static/"
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+# Default primary key field type
+# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+
+marmut\urls.py:
 from django.contrib import admin
-
-# Register your models here.
-
-
-
-song\apps.py:
-from django.apps import AppConfig
-
-
-class SongConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'song'
-
-
-
-song\models.py:
-from django.db import models
-from django.contrib.auth.models import User
-
-class Song(models.Model):
-    title = models.CharField(max_length=100)
-    genre = models.CharField(max_length=100)
-    artist = models.CharField(max_length=100)
-    songwriter = models.CharField(max_length=100)
-    duration = models.IntegerField()
-    release_date = models.DateField()
-    year = models.IntegerField()
-    total_play = models.IntegerField(default=0)
-    total_download = models.IntegerField(default=0)
-    album = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.title
-
-class AkunPlaySong(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    song = models.ForeignKey(Song, on_delete=models.CASCADE)
-    timestamp = models.DateTimeField(auto_now_add=True)
-
-class DownloadedSong(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    song = models.ForeignKey(Song, on_delete=models.CASCADE)
-    timestamp = models.DateTimeField(auto_now_add=True)
-
-
-
-song\tests.py:
-from django.test import TestCase
-
-# Create your tests here.
-
-
-
-song\urls.py:
-from django.urls import path
-from . import views
+from django.urls import path, include
 
 urlpatterns = [
-    path('', views.song_list, name='song_list'),
-    path('<int:song_id>/', views.song_detail, name='song_detail'),
-    path('<int:song_id>/play/', views.play_song, name='play_song'),
-    path('<int:song_id>/add-to-playlist/', views.add_to_playlist, name='add_to_playlist'),
-    path('<int:song_id>/download/', views.download_song, name='download_song'),
-    path('downloaded/', views.downloaded_songs, name='downloaded_songs'),
-    path('search/', views.search, name='search'),
+    path('admin/', admin.site.urls),
+    path('', include('main.urls')),
+    path('playlist/', include('playlist.urls')),
+    path('langganan/', include('langganan.urls', namespace='langganan')),
+    path('song/', include('song.urls')),
+    path('royalty_management/', include('royalty_management.urls')),
 ]
 
 
 
-song\views.py:
-from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse
-from django.contrib import messages
-from django.utils import timezone
-from .models import Song, AkunPlaySong, DownloadedSong
-from playlist.models import Playlist, UserPlaylist
-from connector.query import query, get_session_info
+marmut\wsgi.py:
+"""
+WSGI config for marmut project.
 
-def song_list(request):
-    songs = Song.objects.all()
-    return render(request, 'song/song_list.html', {'songs': songs})
+It exposes the WSGI callable as a module-level variable named ``application``.
 
-def song_detail(request, song_id):
-    ses_info = get_session_info(request)
-    if not ses_info:
-        return redirect('main:login')
-    
-    song = get_object_or_404(Song, id=song_id)
-    is_premium = ses_info.get('is_premium', False)
-    user_email = ses_info['email']
+For more information on this file, see
+https://docs.djangoproject.com/en/4.2/howto/deployment/wsgi/
+"""
 
-    if request.method == 'POST':
-        if 'play' in request.POST:
-            progress = int(request.POST.get('progress', 0))
-            if progress > 70:
-                song.total_play += 1
-                song.save()
-                AkunPlaySong.objects.create(email_pemain=user_email, id_song=song_id, waktu=timezone.now())
-        
-        elif 'add_to_playlist' in request.POST:
-            playlist_id = request.POST.get('playlist')
-            playlist = get_object_or_404(Playlist, id=playlist_id)
-            if UserPlaylist.objects.filter(id_user_playlist=playlist_id, id_song=song_id).exists():
-                message = f"Lagu dengan judul '{song.title}' sudah ditambahkan di '{playlist.title}'!"
+import os
+
+from django.core.wsgi import get_wsgi_application
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "marmut.settings")
+
+application = get_wsgi_application()
+
+
+
+marmut\__init__.py:
+
+
+
+connector\query.py:
+from collections import namedtuple
+import psycopg2
+from psycopg2 import Error
+from psycopg2.extras import RealDictCursor
+from django.http import HttpRequest  # for the 'request' parameter
+
+
+try:
+    connection = psycopg2.connect(user="postgres.tutzylpjrcjropovgoly",
+                        password="eqRvUiBE4LZlukUp",
+                        host="aws-0-ap-southeast-1.pooler.supabase.com",
+                        port="5432",
+                        database="postgres")
+
+    # Create a cursor to perform database operations
+    connection.autocommit = True
+    cursor = connection.cursor()
+except (Exception, Error) as error:
+    print("Error while connecting to PostgreSQL", error)
+
+
+def map_cursor(cursor):
+    "Return all rows from a cursor as a namedtuple"
+    desc = cursor.description
+    nt_result = namedtuple("Result", [col[0] for col in desc])
+    return [dict(row) for row in cursor.fetchall()]
+
+
+def query(query_str: str):
+    hasil = []
+    with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+        cursor.execute("SET SEARCH_PATH TO PUBLIC")
+        try:
+            cursor.execute(query_str)
+
+            if query_str.strip().upper().startswith("SELECT"):
+                # Kalau ga error, return hasil SELECT
+                hasil = map_cursor(cursor)
             else:
-                UserPlaylist.objects.create(id_user_playlist=playlist_id, id_song=song_id)
-                message = f"Berhasil menambahkan Lagu dengan judul '{song.title}' ke '{playlist.title}'!"
-            return render(request, 'song/song_detail.html', {'song': song, 'is_premium': is_premium, 'message': message})
-        
-        elif 'download' in request.POST:
-            if is_premium:
-                if DownloadedSong.objects.filter(email_downloader=user_email, id_song=song_id).exists():
-                    message = f"Lagu dengan judul '{song.title}' sudah pernah di unduh!"
-                else:
-                    DownloadedSong.objects.create(email_downloader=user_email, id_song=song_id)
-                    song.total_download += 1
-                    song.save()
-                    message = f"Berhasil mengunduh Lagu dengan judul '{song.title}'!"
-                return render(request, 'song/song_detail.html', {'song': song, 'is_premium': is_premium, 'message': message})
-    
-    playlists = Playlist.objects.filter(email_pembuat=user_email)
-    return render(request, 'song/song_detail.html', {'song': song, 'is_premium': is_premium, 'playlists': playlists})
+                # Kalau ga error, return jumlah row yang termodifikasi oleh INSERT, UPDATE, DELETE
+                hasil = cursor.rowcount
+                connection.commit()
+        except Exception as e:
+            # Ga tau error apa
+            hasil = "error :\n" + str(e)
 
-def play_song(request, song_id):
-    ses_info = get_session_info(request)
-    if not ses_info:
-        return redirect('main:login')
-    
-    song = get_object_or_404(Song, id=song_id)
-    progress = int(request.POST.get('progress', 0))
-    user_email = ses_info['email']
-    if progress > 70:
-        song.total_play += 1
-        song.save()
-        AkunPlaySong.objects.create(email_pemain=user_email, id_song=song_id)
-    return JsonResponse({'status': 'success'})
+    return hasil
 
-def add_to_playlist(request, song_id):
-    ses_info = get_session_info(request)
-    if not ses_info:
-        return redirect('main:login')
-    
-    song = get_object_or_404(Song, id=song_id)
-    user_email = ses_info['email']
-    if request.method == 'POST':
-        playlist_id = request.POST.get('playlist')
-        playlist = get_object_or_404(Playlist, id=playlist_id)
-        UserPlaylist.objects.create(id_user_playlist=playlist_id, id_song=song_id)
-        return render(request, 'song/message.html', {
-            'message': f"Berhasil menambahkan Lagu dengan judul '{song.title}' ke '{playlist.name}'!",
-            'playlist_url': reverse('playlist_detail', args=[playlist_id]),
-            'song_id': song_id,
-        })
-    playlists = Playlist.objects.filter(email_pembuat=user_email)
-    return render(request, 'song/add_to_playlist.html', {'song': song, 'playlists': playlists})
+def get_session_info(request):
+    session_id = request.COOKIES.get('session_id')
+    if session_id:
+        user = query(f"SELECT * FROM SESSIONS WHERE session_id = '{session_id}'")
+        if user:
+            return user[0]
+    return None
 
-def download_song(request, song_id):
-    ses_info = get_session_info(request)
-    if not ses_info:
-        return redirect('main:login')
-    
-    song = get_object_or_404(Song, id=song_id)
-    user_email = ses_info['email']
-    if ses_info.get('is_premium', False):
-        song.total_download += 1
-        song.save()
-        DownloadedSong.objects.create(email_downloader=user_email, id_song=song_id)
-        return render(request, 'song/message.html', {
-            'message': f"Berhasil mengunduh Lagu dengan judul '{song.title}'!",
-            'playlist_url': reverse('downloaded_songs'),
-            'song_id': song_id,
-        })
-    return redirect('song_detail', song_id=song_id)
+def get_navbar_info(request: HttpRequest):
+    session_info = get_session_info(request)
 
-def downloaded_songs(request):
-    ses_info = get_session_info(request)
-    if not ses_info:
-        return redirect('main:login')
-    
-    user_email = ses_info['email']
-    downloaded_songs = DownloadedSong.objects.filter(email_downloader=user_email).order_by('-timestamp')
-    
-    if request.method == 'POST':
-        song_id = request.POST.get('song_id')
-        song = get_object_or_404(Song, id=song_id)
-        downloaded_song = get_object_or_404(DownloadedSong, email_downloader=user_email, id_song=song_id)
-        downloaded_song.delete()
-        song.total_download -= 1
-        song.save()
-        messages.success(request, f"Berhasil menghapus Lagu dengan judul '{song.title}' dari daftar unduhan!")
-        return redirect('downloaded_songs')
-    
-    return render(request, 'song/downloaded_songs.html', {'downloaded_songs': downloaded_songs})
-
-def search(request):
-    query_str = request.GET.get('query')
-    
-    if query_str:
-        songs = Song.objects.filter(title__icontains=query_str)
-        podcasts = Podcast.objects.filter(title__icontains=query_str)
-        user_playlists = UserPlaylist.objects.filter(title__icontains=query_str)
-        
-        results = []
-        for song in songs:
-            results.append({
-                'type': 'SONG',
-                'title': song.title,
-                'by': song.artist,
-                'url': reverse('song_detail', args=[song.id])
-            })
-        for podcast in podcasts:
-            results.append({
-                'type': 'PODCAST',
-                'title': podcast.title,
-                'by': podcast.podcaster,
-                'url': reverse('podcast_detail', args=[podcast.id])
-            })
-        for playlist in user_playlists:
-            results.append({
-                'type': 'USER PLAYLIST',
-                'title': playlist.title,
-                'by': playlist.user.username,
-                'url': reverse('playlist_detail', args=[playlist.id])
-            })
+    if session_info:
+        return {
+            'is_guest': False,
+            'is_user': not session_info['is_label'],
+            'is_artist': session_info['is_artist'],
+            'is_songwriter': session_info['is_songwriter']  ,
+            'is_podcaster': session_info['is_podcaster'],
+            'is_premium': session_info['is_premium'],
+            'is_label': session_info['is_label'],
+        }
     else:
-        results = []
-    
-    context = {
-        'query': query_str,
-        'results': results
-    }
-    return render(request, 'main/search_results.html', context)
-
-
-
-song\__init__.py:
-
+        return {
+            'is_guest': True,
+            'is_user': False,
+            'is_artist': False,
+            'is_songwriter': False,
+            'is_podcaster': False,
+            'is_premium': False,
+            'is_label': False,
+        }
 
 
 main\admin.py:
@@ -805,11 +505,59 @@ def query(query_str: str):
     return hasil
 
 email = "ganjar@pranowo.com"
-email_exists = query(f"SELECT * FROM AKUN WHERE email = '{email}' UNION SELECT * FROM LABEL WHERE email = '{email}'")
-if email_exists:
-    print("Email belum terdaftar")
-else:
-    print("Email sudah terdaftar")
+id_konten = "f178a9c2-9054-4fe2-8972-77abc0998131"
+# email_exists = query(f"""
+#     SELECT * FROM 
+#         (SELECT * FROM SONG WHERE id_konten = '{id_konten}') AS LAGU 
+#         NATURAL JOIN 
+#         (SELECT judul AS judul_lagu, tanggal_rilis, tahun, durasi FROM KONTEN WHERE id = '{id_konten}') AS CONTENT
+#         JOIN
+#         (SELECT id AS album_id, judul AS judul_album FROM ALBUM) AS ALBUM ON LAGU.id_album = ALBUM.album_id
+#         JOIN 
+#         (SELECT id AS artist_id, email_akun FROM ARTIST) AS ARTIST ON LAGU.id_artist = ARTIST.artist_id
+#         JOIN
+#         (SELECT email, nama FROM AKUN) AS AKUN ON ARTIST.email_akun = AKUN.email;
+#     """)
+# print(email_exists)
+# songwriters = query(f"""
+#     SELECT nama FROM AKUN WHERE email IN 
+#         (SELECT email_akun FROM SONGWRITER WHERE id IN
+#             (SELECT id_songwriter FROM SONGWRITER_WRITE_SONG WHERE id_song = '{id_konten}')
+#         )
+# """)
+
+# print(songwriters)
+
+# songwriters = [sw['nama'] for sw in songwriters]
+
+# print(songwriters)
+
+id_user_playlist = "05a104c1-e02b-4dff-bfc1-d52c92ba6ed2"
+query_string = f"""
+    SELECT *
+    FROM USER_PLAYLIST up
+    JOIN AKUN a ON up.email_pembuat = a.email
+    WHERE up.id_user_playlist = '{id_user_playlist}';        
+"""
+playlist = query(query_string)[0]
+# query_string = f"""
+#     SELECT * FROM 
+#     (SELECT * FROM SONG WHERE id_konten IN
+#         (SELECT id_song FROM PLAYLIST_SONG WHERE id_playlist = '{playlist['id_playlist']}')) AS LAGU
+#     JOIN
+#     (SELECT id, judul AS judul_lagu, tanggal_rilis, tahun, durasi FROM KONTEN) AS CONTENT
+#     ON LAGU.id_konten = CONTENT.id
+#     JOIN
+#     (SELECT id AS artist_id, email_akun FROM ARTIST) AS ARTIST ON LAGU.id_artist = ARTIST.artist_id
+        
+# """
+# songs = query(query_string)
+# for song in songs:
+#     print(song)
+#     print("=========")
+# print(len(songs))
+print(playlist)
+print([1,2,3]+[4,5,6])
 
 
 main\models.py:
@@ -865,6 +613,7 @@ from main.views import weekly
 from main.views import monthly
 from main.views import yearly
 from main.views import podetail
+from main.views import download_song, add_song_to_playlist, user_play_song, shuffle_playlist
 
 app_name = 'main'
 
@@ -874,8 +623,8 @@ urlpatterns = [
     path('login/', login_user, name='login'),
     path('logout/', logout_user, name='logout'),
     path('search/', search, name='search'),
-    path('play-song/', play_song, name='play_song'),
-    path('play-user-playlist/', play_user_playlist, name='play_user_playlist'),
+    path('play-song/<str:id>/', play_song, name='play_song'),
+    path('play-user-playlist/<str:id>/', play_user_playlist, name='play_user_playlist'),    
     path('createpod.html/', createpod, name='createpod'),
     path('createpod.html/createpod_episode.html/', createpodepisode, name='createpodepisode'),
     path('podetail.html/', podetail, name='podetail'),
@@ -889,6 +638,10 @@ urlpatterns = [
     path('home/', home, name='home'),
     path('login_and_register/', login_and_register, name='login_and_register'),
     path('dashboard/', dashboard, name='dashboard'),
+    path('download-song/<str:id>/', download_song, name='download_song'),
+    path('add-song-to-playlist/', add_song_to_playlist, name='add_song_to_playlist'),
+    path('user-play-song/<str:id>/', user_play_song, name='user_play_song'),
+    path('shuffle-playlist/<str:id>/', shuffle_playlist, name='shuffle_playlist')
 ]
 
 
@@ -907,41 +660,23 @@ import datetime
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
-from playlist.models import Song, UserPlaylist
+
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import login
-from .models import UserProfile, LabelProfile
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
-from connector.query import query, get_session_info
+from connector.query import query, get_session_info, get_navbar_info
 import uuid
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 
 
-def get_user_type(user):
-    try:
-        user_profile = user.userprofile
-        if user_profile.is_artist:
-            return 'artist'
-        elif user_profile.is_songwriter:
-            return 'songwriter'
-        elif user_profile.is_podcaster:
-            return 'podcaster'
-        else:
-            return 'user'
-    except UserProfile.DoesNotExist:
-        try:
-            label_profile = user.labelprofile
-            return 'label'
-        except LabelProfile.DoesNotExist:
-            return 'guest'
-
+@csrf_exempt
 def show_main(request):
     return redirect('main:login_and_register')
 
-
+@csrf_exempt
 def register_user(request):
     if request.method == 'POST':
         email = request.POST.get('email')
@@ -951,16 +686,11 @@ def register_user(request):
         birth_place = request.POST.get('birthplace')
         birth_date = request.POST.get('birthdate')
         city = request.POST.get('city')
-        is_artist = 'True' in request.POST.get('is_artist')
-        is_songwriter = 'True' in request.POST.get('is_songwriter')
-        is_podcaster = 'True' in request.POST.get('is_podcaster')
+        is_artist = 'True' == request.POST.get('is_artist')
+        is_songwriter = 'True' == request.POST.get('is_songwriter')
+        is_podcaster = 'True' == request.POST.get('is_podcaster')
         
         #CEK APAKAH EMAIL SUDAH TERDAFTAR
-        email_exists = query(f"SELECT * FROM AKUN WHERE email = '{email}' UNION SELECT * FROM LABEL WHERE email = '{email}'")
-        if len(email_exists)!=0:
-            messages.error(request, 'Email already registered!')
-            return redirect('main:register_label')
-        
         is_verified = is_artist or is_songwriter or is_podcaster 
         pemilik_hak_cipta_id = str(uuid.uuid4())
 
@@ -968,10 +698,6 @@ def register_user(request):
                 INSERT INTO AKUN (email, password, nama, gender, tempat_lahir, tanggal_lahir, is_verified, kota_asal)
                 VALUES ('{email}', '{password}', '{name}', {gender}, '{birth_place}', '{birth_date}', {is_verified}, '{city}');
             """
-
-        query_string += f"""
-            INSERT INTO NONPREMIUM (email) VALUES ('{email}');
-        """
         
         if is_podcaster:
             query_string += f"""
@@ -1006,7 +732,7 @@ def register_user(request):
             """
 
         res = query(query_string)
-
+        print("cok", res)
         
         if "error" in str(res):
             messages.error(request, 'An error occurred while registering your account. Please try again later.')
@@ -1014,9 +740,12 @@ def register_user(request):
         else:
             messages.success(request, 'Registration successful!')
             return redirect('main:login')  
+    context = {
+        'navbar' : get_navbar_info(request)
+    }
+    return render(request, 'register_user.html', context)
 
-    return render(request, 'register_user.html')
-
+@csrf_exempt
 def register_label(request):
     if request.method == 'POST':
         email = request.POST.get('email')
@@ -1027,10 +756,6 @@ def register_label(request):
         pemilik_hak_cipta_id = str(uuid.uuid4())
         
         #CEK APAKAH EMAIL SUDAH TERDAFTAR
-        email_exists = query(f"SELECT * FROM AKUN WHERE email = '{email}' UNION SELECT * FROM LABEL WHERE email = '{email}'")
-        if len(email_exists)!=0:
-            messages.error(request, 'Email already registered!')
-            return redirect('main:register_label')
         
 
         # Insert pemilik hak cipta
@@ -1049,26 +774,38 @@ def register_label(request):
         res = query(query_string)
 
         if "error" in str(res):
-            messages.error(request, 'An error occurred while registering your account. Please try again later.')
+            if("Email sudah terdaftar" in str(res)):
+                messages.error(request, 'Email is already registered!')
+            else:
+                messages.error(request, 'An error occurred while registering your account. Please try again later.')
             print(res)
         else:
             messages.success(request, 'Registration successful!')
             return redirect('main:login')  # Redirect to a home or profile page
-
-    return render(request, 'register_label.html')
-
+    context = {
+        'navbar' : get_navbar_info(request)
+    }
+    return render(request, 'register_label.html', context)
+@csrf_exempt
 def register(request):
     # Simply render the choice page without any logic for POST methods
-    return render(request, 'register.html')
-
+    context = {
+        'navbar' : get_navbar_info(request)
+    }
+    return render(request, 'register.html', context)
+@csrf_exempt
 def login_and_register(request):
-    return render(request, 'login_and_register.html')
-
+    context = {
+        'navbar' : get_navbar_info(request)
+    }
+    return render(request, 'login_and_register.html', context)
+@csrf_exempt
 def login_user(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
-        user = query(f"SELECT * FROM AKUN WHERE email = '{email}' AND password = '{password}' UNION SELECT * FROM LABEL WHERE email = '{email}' AND password = '{password}'")
+        user = query(f"SELECT email FROM AKUN WHERE email = '{email}' AND password = '{password}' UNION SELECT email FROM LABEL WHERE email = '{email}' AND password = '{password}'")
+        print(user)
         if len(user) == 0:
             messages.error(request, 'Invalid email or password!')
         else:
@@ -1080,16 +817,18 @@ def login_user(request):
 
             session_id = str(uuid.uuid4())
             temp = query(f"""INSERT INTO SESSIONS (session_id, email, is_label, is_premium, is_artist, is_songwriter, is_podcaster) 
-                            VALUES ('{session_id}', '{email}', {is_label}, {is_premium}, {is_artist}, {is_songwriter}, {is_podcaster})
-                        """)
+                  VALUES ('{session_id}', '{email}' , {is_label}, {is_premium}, {is_artist}, {is_songwriter}, {is_podcaster})
+                """)
+            
 
             response = redirect('main:dashboard')
             response.set_cookie('session_id', session_id)
             return response
-
-    return render(request, 'login.html')
-
-
+    context = {
+        'navbar' : get_navbar_info(request)
+    }
+    return render(request, 'login.html', context)
+@csrf_exempt
 def logout_user(request):
     session_id = request.COOKIES.get('session_id')
     if session_id:
@@ -1100,54 +839,209 @@ def logout_user(request):
     response.delete_cookie('session_id')  # Delete session_id cookie
     return response
 
-
-def play_song(request):
-    song_data = {
-        'title': 'Blinding Lights',
-        'genres': ['Pop', 'Synthwave'],
-        'artist': 'The Weeknd',
-        'songwriters': ['Abel Tesfaye', 'Ahmad Balshe', 'Jason Quenneville', 'Max Martin', 'Oscar Holter'],
-        'duration': 3.22,  
-        'release_date': '29/11/2019',
-        'year': 2019,
-        'album': 'After Hours',
-        'total_plays': 2_700_000_000,  
-        'total_downloads': 1_000_000  
-    }
-
-    return render(request, 'play_song.html', {'song': song_data, 'user': request.user, 'user_is_premium': True})
-
-
-def play_user_playlist(request):
-    songs_data = [
-        {'id': 1, 'title': 'Shape of You', 'artist': 'Ed Sheeran', 'duration': '3 minutes 53 seconds', 'play_count': 0},
-        {'id': 2, 'title': 'Blinding Lights', 'artist': 'The Weeknd', 'duration': '3 minutes 20 seconds', 'play_count': 0},
-        {'id': 3, 'title': 'Rolling in the Deep', 'artist': 'Adele', 'duration': '3 minutes 48 seconds', 'play_count': 0},
-        {'id': 4, 'title': 'Bad Guy', 'artist': 'Billie Eilish', 'duration': '3 minutes 14 seconds', 'play_count': 0},
-        {'id': 5, 'title': 'Thriller', 'artist': 'Michael Jackson', 'duration': '5 minutes 57 seconds', 'play_count': 0}
-    ]
-
+@csrf_exempt
+def play_song(request, id):
+    user = get_session_info(request)
+    if not user:
+        return redirect('main:login')
+    id_konten = id
+    query_string = f"""
+    SELECT * FROM 
+        (SELECT * FROM SONG WHERE id_konten = '{id_konten}') AS LAGU 
+        NATURAL JOIN 
+        (SELECT judul AS judul_lagu, tanggal_rilis, tahun, durasi FROM KONTEN WHERE id = '{id_konten}') AS CONTENT
+        JOIN
+        (SELECT id AS album_id, judul AS judul_album FROM ALBUM) AS ALBUM ON LAGU.id_album = ALBUM.album_id
+        JOIN 
+        (SELECT id AS artist_id, email_akun FROM ARTIST) AS ARTIST ON LAGU.id_artist = ARTIST.artist_id
+        JOIN
+        (SELECT email, nama FROM AKUN) AS AKUN ON ARTIST.email_akun = AKUN.email;
+    """
     
-    total_seconds = sum(int(song['duration'].split()[0]) * 60 + int(song['duration'].split()[2]) for song in songs_data)
-    total_hours = total_seconds // 3600
-    total_minutes = (total_seconds % 3600) // 60
+    genre = query(f"SELECT genre FROM GENRE WHERE id_konten = '{id_konten}'")
+    genre = [g['genre'] for g in genre]
 
+    songwriters = query(f"""
+        SELECT nama FROM AKUN WHERE email IN 
+            (SELECT email_akun FROM SONGWRITER WHERE id IN
+                (SELECT id_songwriter FROM SONGWRITER_WRITE_SONG WHERE id_song = '{id_konten}')
+            )
+    """)
+
+    songwriters = [sw['nama'] for sw in songwriters]
+
+    user_playlist = query(f"SELECT * FROM USER_PLAYLIST WHERE email_pembuat = '{user['email']}'")
+    user_playlist = [{'id': p['id_user_playlist'], 'title': p['judul']} for p in user_playlist]
+
+    is_downloaded = query(f"SELECT * FROM DOWNLOADED_SONG WHERE id_song = '{id_konten}' AND email_downloader = '{user['email']}'")
+    is_downloaded = len(is_downloaded) > 0
+
+    konten = query(query_string)[0]    
+
+    song_data = {
+        'id': konten['id_konten'],
+        'title': konten['judul_lagu'],
+        'genres': genre,
+        'artist': konten['nama'],
+        'songwriters': songwriters,
+        'duration': konten['durasi'],  
+        'release_date': konten['tanggal_rilis'],
+        'year': konten['tahun'],
+        'album': konten['judul_album'],
+        'total_plays': konten['total_play'],  
+        'total_downloads': konten['total_download'],  
+        'user_playlists': user_playlist,
+        'is_downloaded': is_downloaded,
+    }
+    context = {
+        'song': song_data,
+        'user': request.user,
+        'user_is_premium': user['is_premium'],
+        'navbar' : get_navbar_info(request),
+    }
+    return render(request, 'play_song.html', context)
+@csrf_exempt
+def download_song(request, id):
+    user = get_session_info(request)
+    if not user:
+        return redirect('main:login')
+    email = user['email']
+    id_konten = id
+    query_string = f"""
+        INSERT INTO DOWNLOADED_SONG (id_song, email_downloader) VALUES ('{id_konten}', '{email}');
+    """
+    res = query(query_string)
+    if "error" in str(res):
+        return HttpResponseNotFound("Download Failed")
+    else:
+        return HttpResponse("Song downloaded successfully!")
+@csrf_exempt
+def add_song_to_playlist(request):
+    id_song = request.POST.get('id_song')
+    id_playlist = request.POST.get('id_playlist')
+
+    query_string = f"""
+        INSERT INTO PLAYLIST_SONG (id_playlist, id_song) VALUES ((SELECT id_playlist FROM USER_PLAYLIST WHERE id_user_playlist = '{id_playlist}'), '{id_song}');
+    """
+    res = query(query_string)
+    print(res)
+    if "error" in str(res):
+        return HttpResponseNotFound("Failed to add song to playlist")
+    else:
+        return redirect('main:play_user_playlist', id=id_playlist)
+@csrf_exempt
+def user_play_song(request, id):
+    user = get_session_info(request)
+    if not user:
+        return redirect('main:login')
+    id_konten = id
+    waktu = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    query_string = f"""
+        INSERT INTO AKUN_PLAY_SONG (email_pemain, id_song, waktu) VALUES ('{user['email']}', '{id_konten}', '{waktu}');
+    """
+    res = query(query_string)
+    print(res)
+    if "error" in str(res):
+        return HttpResponseNotFound("Failed to play song")
+    else:
+        return HttpResponse("Song played successfully!")
+
+@csrf_exempt
+def play_user_playlist(request, id):
+    user = get_session_info(request)
+    if not user:
+        return redirect('main:login')
+    id_user_playlist = id
+    query_string = f"""
+        SELECT *
+        FROM USER_PLAYLIST up
+        JOIN AKUN a ON up.email_pembuat = a.email
+        WHERE up.id_user_playlist = '{id_user_playlist}';        
+    """
+    playlist = query(query_string)[0]
+    query_string = f"""
+        SELECT * FROM 
+        (SELECT * FROM SONG WHERE id_konten IN 
+            (SELECT id_song FROM PLAYLIST_SONG WHERE id_playlist = '{playlist['id_playlist']}')) AS LAGU
+        JOIN
+        (SELECT id, judul AS judul_lagu, tanggal_rilis, tahun, durasi FROM KONTEN) AS CONTENT
+        ON LAGU.id_konten = CONTENT.id
+        JOIN
+        (SELECT id AS artist_id, email_akun FROM ARTIST) AS ARTIST ON LAGU.id_artist = ARTIST.artist_id
+        JOIN
+        (SELECT email, nama FROM AKUN) AS AKUN ON ARTIST.email_akun = AKUN.email;
+    """
+    songs = query(query_string)
+    
+    songs_data = []
+    total_hours = playlist['total_durasi'] // 60
+    total_minutes = playlist['total_durasi'] % 60
+    for song in songs:
+        songs_data.append({
+            'title': song['judul_lagu'],
+            'artist': song['nama'],
+            'duration': song['durasi'],
+            'id_song': song['id_konten']
+        })
+    
     playlist_data = {
-        'id': 101,
-        'title': 'basdut',
-        'creator': 'Lisan Al gaib',
+        'id': playlist['id_user_playlist'],
+        'title': playlist['judul'],
+        'creator': playlist['nama'],
         'songs': songs_data,
         'total_duration_hours': total_hours,
         'total_duration_minutes': total_minutes,
-        'created_date': '2024-03-18',
-        'description': 'A playlist featuring some of the biggest hits from various artists across genres.'
+        'created_date': playlist['tanggal_dibuat'],
+        'description': playlist['deskripsi']
     }
+    print(playlist_data)
+    context = {
+        'playlist': playlist_data,
+        'navbar' : get_navbar_info(request),
+    }
+    
+    return render(request, 'play_user_playlist.html', context)
 
+@csrf_exempt
+def shuffle_playlist(request, id):
+    id_user_playlist = id
 
-    return render(request, 'play_user_playlist.html', {'playlist': playlist_data})
+    user = get_session_info(request)
+    if not user:
+        return redirect('main:login')
+    player = user['email']
+    query_string = f"""
+        
+        INSERT INTO AKUN_PLAY_USER_PLAYLIST (email_pemain, id_user_playlist, email_pembuat, waktu)
+        SELECT '{player}', id_user_playlist, email_pembuat, current_timestamp
+        FROM USER_PLAYLIST
+        WHERE id_user_playlist = '{id_user_playlist}';
+
+        
+        INSERT INTO AKUN_PLAY_SONG (email_pemain, id_song, waktu)
+        SELECT 
+            '{player}' AS email_pemain, 
+            ps.id_song AS id_song, 
+            current_timestamp AS waktu
+        FROM 
+            PLAYLIST_SONG ps
+        JOIN 
+            USER_PLAYLIST up ON ps.id_playlist = up.id_playlist
+        WHERE 
+            up.id_user_playlist = '{id_user_playlist}';
+    """
+    res = query(query_string)
+
+    if "error" in str(res):
+        return HttpResponseNotFound("Failed to shuffle playlist")
+    else:
+        return HttpResponse("Playlist shuffled successfully!")
+
 
 def search(request):
     query_str = request.GET.get('query')
+    pass
+#     query = request.GET.get('query')
     
     if query_str:
         songs = query(f"""
@@ -1167,6 +1061,10 @@ def search(request):
             JOIN AKUN ak ON up.email_pembuat = ak.email
             WHERE up.judul ILIKE '%{query_str}%'
         """)
+#     if query:
+#         songs = Song.objects.filter(title__icontains=query)
+#         podcasts = podcast.objects.filter(title__icontains=query)
+#         user_playlists = UserPlaylist.objects.filter(title__icontains=query)
         
         results = []
         for song in songs:
@@ -1186,12 +1084,43 @@ def search(request):
             })
     else:
         results = []
+#         results = []
+#         for song in songs:
+#             results.append({
+#                 'type': 'SONG',
+#                 'title': song.title,
+#                 'by': song.artist,
+#                 'url': reverse('song_detail', args=[song.id])
+#             })
+#         for podcast in podcasts:
+#             results.append({
+#                 'type': 'PODCAST',
+#                 'title': podcast.title,
+#                 'by': podcast.podcaster,
+#                 'url': reverse('podcast_detail', args=[podcast.id])
+#             })
+#         for playlist in user_playlists:
+#             results.append({
+#                 'type': 'USER PLAYLIST',
+#                 'title': playlist.title,
+#                 'by': playlist.user.username,
+#                 'url': reverse('playlist_detail', args=[playlist.id])
+#             })
+#     else:
+#         results = []
     
     context = {
         'query': query_str,
         'results': results
     }
     return render(request, 'search_results.html', context)
+#     context = {
+#         'query': query,
+#         'results': results
+#     }
+#     return render(request, 'main/search_results.html', context)
+
+
 
 def createpod(request):
     # Logika untuk menampilkan halaman createpod.html
@@ -1221,10 +1150,13 @@ def yearly(request):
 
 def podetail(request):
     return render(request, "podcastdetail.html")
+
+@csrf_exempt
 def home(request):
     #redirect to login and register
     return redirect('main:login_and_register')
 
+@csrf_exempt
 def dashboard(request):
     # Get user from session
     ses_info = get_session_info(request)
@@ -1235,6 +1167,53 @@ def dashboard(request):
     user = query(f"SELECT * FROM AKUN WHERE email = '{email}'")[0]
     if ses_info['is_label']:
         user = query(f"SELECT * FROM LABEL WHERE email = '{email}'")[0]
+    
+    roles = []
+    if ses_info['is_label']:
+        roles.append("Label")
+    if ses_info['is_artist']:
+        roles.append("Artist")
+    if ses_info['is_songwriter']:
+        roles.append("Songwriter")
+    if ses_info['is_podcaster']:
+        roles.append("Podcaster")
+    roles.append("Pengguna")
+    role_str = ", ".join(roles)
+
+    if ses_info['is_label']:
+        album_list = query(f"SELECT * FROM ALBUM JOIN LABEL ON ALBUM.id_label = LABEL.id WHERE LABEL.email = '{email}'")
+        album_list = [{'title': album['judul'], 'release_date': album['tanggal_rilis']} for album in album_list]
+    else:
+        album_list = []
+
+    if ses_info['is_podcaster']:
+        podcasts = query(f"SELECT * FROM PODCAST JOIN KONTEN ON PODCAST.id_konten = KONTEN.id WHERE PODCAST.email_podcaster = '{email}'")
+        podcasts = [{'title': podcast['judul'], 'release_date': podcast['tanggal_rilis'], 'durasi': podcast['durasi']} for podcast in podcasts]
+    else:
+        podcasts = []
+    
+    if ses_info['is_artist']:
+        songs_artist = query(f"SELECT judul, tanggal_rilis, durasi  FROM SONG JOIN KONTEN ON SONG.id_konten = KONTEN.id JOIN ARTIST ON ARTIST.id = SONG.id_artist WHERE ARTIST.email_akun = '{email}'")
+        print(songs_artist)
+        songs_artist = [{'title': song['judul'], 'release_date': song['tanggal_rilis'], 'durasi': song['durasi']} for song in songs_artist]
+    else:
+        songs_artist = []
+    
+    if ses_info['is_songwriter']:
+        songs_songwriter = query(f"SELECT * FROM KONTEN WHERE KONTEN.id IN (SELECT id_song FROM SONGWRITER_WRITE_SONG WHERE SONGWRITER_WRITE_SONG.id_songwriter = (SELECT id FROM SONGWRITER WHERE email_akun = '{email}'))")
+        songs_songwriter = [{'title': song['judul'], 'release_date': song['tanggal_rilis'], 'durasi': song['durasi']} for song in songs_songwriter]
+    else:
+        songs_songwriter = []
+    
+    songs = songs_artist + songs_songwriter
+
+    playlists = query(f"""
+        SELECT * FROM USER_PLAYLIST up
+        JOIN AKUN a ON up.email_pembuat = a.email
+        WHERE up.email_pembuat = '{email}';
+    """)
+    print(playlists)
+    playlists = [{'title': playlist['judul'], 'created_at': playlist['tanggal_dibuat'], 'song_count': playlist['jumlah_lagu'], 'total_duration': playlist['total_durasi']} for playlist in playlists]
 
     user = {
         'name': user['nama'],
@@ -1243,1753 +1222,22 @@ def dashboard(request):
         'gender': user['gender'],
         'birth_place': user['tempat_lahir'],
         'birth_date': user['tanggal_lahir'],
-        'role': 'Regular User',
-        'playlists': [
-            {
-                'name': 'Favorite Songs',
-                'song_count': 10,
-                'created_at': '2023-04-01',
-                'total_duration': '1:25:30'
-            },
-            {
-                'name': 'Workout Playlist',
-                'song_count': 15,
-                'created_at': '2022-12-15',
-                'total_duration': '2:10:45'
-            },
-            {
-                'name': 'Chill Vibes',
-                'song_count': 8,
-                'created_at': '2023-03-20',
-                'total_duration': '1:18:12'
-            },
-        ],
+        'role': role_str,
+        'playlists': playlists,
+        'songs': songs,
+        'podcasts': podcasts,
+        'albums': album_list,
     }
 
     context = {
         'user': user,
-        'user_type': ses_info['is_label'] and 'label' or 'user',
+        'user_type': 'user',
+        'navbar' : get_navbar_info(request),
     }
     return render(request, 'dashboard.html', context)
 
 
 main\__init__.py:
-
-
-
-marmut\asgi.py:
-"""
-ASGI config for marmut project.
-
-It exposes the ASGI callable as a module-level variable named ``application``.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/4.2/howto/deployment/asgi/
-"""
-
-import os
-
-from django.core.asgi import get_asgi_application
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "marmut.settings")
-
-application = get_asgi_application()
-
-
-
-marmut\settings.py:
-"""
-Django settings for marmut project.
-
-Generated by 'django-admin startproject' using Django 4.2.4.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/4.2/topics/settings/
-
-For the full list of settings and their values, see
-https://docs.djangoproject.com/en/4.2/ref/settings/
-"""
-
-from pathlib import Path
-import environ # Tambahkan kode berikut
-import os # Tambahkan kode berikut
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-env = environ.Env() # Tambahkan kode berikut
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-5dgque*$6nl$6wj!p#7%6b=ot92+jm@f%!(*9-2tz!3=&n&+*w"
-
-PRODUCTION = env.bool('PRODUCTION', False)
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ["*"]
-
-
-# Application definition
-
-INSTALLED_APPS = [
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
-    "main",
-    "playlist",
-    "langganan",
-    "song",
-    "royalty_management",
-]
-
-LOGIN_URL = 'main:login'  # Change to your actual login URL
-LOGIN_REDIRECT_URL = 'main:home'  # Change to the URL you want to redirect to after login
-LOGOUT_REDIRECT_URL = 'main:login'  # Change to your actual logout redirect URL
-
-
-AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-]
-
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-SESSION_COOKIE_AGE = 1209600  # Two weeks
-SESSION_SAVE_EVERY_REQUEST = True
-
-
-
-MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
-
-ROOT_URLCONF = "marmut.urls"
-
-TEMPLATES = [
-    {
-        "BACKEND": "django.template.backends.django.DjangoTemplates",
-        'DIRS': [BASE_DIR / 'templates'],
-        "APP_DIRS": True,
-        "OPTIONS": {
-            "context_processors": [
-                "django.template.context_processors.debug",
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
-            ],
-        },
-    },
-]
-
-WSGI_APPLICATION = "marmut.wsgi.application"
-
-
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
-
-if PRODUCTION:
-    DATABASES = {
-        'default': env.db('DATABASE_URL')
-    }
-    DATABASES["default"]["ATOMIC_REQUESTS"] = True
-
-
-# Password validation
-# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",},
-    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",},
-    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
-]
-
-
-# Internationalization
-# https://docs.djangoproject.com/en/4.2/topics/i18n/
-
-LANGUAGE_CODE = "en-us"
-
-TIME_ZONE = "UTC"
-
-USE_I18N = True
-
-USE_TZ = True
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
-
-STATIC_URL = "static/"
-
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-
-
-marmut\urls.py:
-from django.contrib import admin
-from django.urls import path, include
-
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include('main.urls')),
-    path('playlist/', include('playlist.urls')),
-    path('langganan/', include('langganan.urls', namespace='langganan')),
-    path('song/', include('song.urls')),
-    path('royalty_management/', include('royalty_management.urls')),
-]
-
-
-
-marmut\wsgi.py:
-"""
-WSGI config for marmut project.
-
-It exposes the WSGI callable as a module-level variable named ``application``.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/4.2/howto/deployment/wsgi/
-"""
-
-import os
-
-from django.core.wsgi import get_wsgi_application
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "marmut.settings")
-
-application = get_wsgi_application()
-
-
-
-marmut\__init__.py:
-
-
-
-main\templates\createpod.html:
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRUD Kelola Podcast</title>
-    <!-- Include Bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.0/css/bootstrap.min.css">
-    <!-- Include Bootstrap Select CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/css/bootstrap-select.min.css">
-    
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f8f9fa;
-        }
-
-        .section {
-            margin-bottom: 30px;
-            background-color: #fff;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .section h2 {
-            margin-bottom: 20px;
-            color: #007bff;
-        }
-
-        .podcast-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .podcast-table th, .podcast-table td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #ccc;
-        }
-
-        .podcast-table th {
-            background-color: #f2f2f2;
-        }
-
-        .podcast-table td:last-child {
-            text-align: center;
-        }
-
-        .podcast-button {
-            padding: 5px 10px;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .podcast-button:hover {
-            background-color: #f0f0f0;
-        }
-    </style>
-</head>
-<body>
-
-<div class="container">
-
-    <!-- CREATE PODCAST FORM -->
-    <div class="section create-podcast">
-        <h2>CREATE PODCAST</h2>
-        <form action="#" method="POST">
-            <label for="podcast-title">Judul:</label>
-            <input type="text" id="podcast-title" name="podcast-title" required><br>
-            
-            <label for="podcast-genre">Genre:</label>
-            <!-- Multiselect Dropdown for Genre -->
-            <select id="podcast-genre" name="podcast-genre" class="selectpicker" multiple required>
-                <option value="genre1">Genre 1</option>
-                <option value="genre2">Genre 2</option>
-                <!-- Add more genre options here -->
-            </select><br>
-            
-            <label for="podcast-duration">Durasi:</label>
-            <input type="text" id="podcast-duration" name="podcast-duration" required><br>
-            
-            <button type="submit">SUBMIT</button>
-        </form>
-    </div>
-
-    <!-- LIST PODCAST -->
-    <div class="section list-podcast">
-        <h2>LIST PODCAST</h2>
-        <table class="podcast-table">
-            <thead>
-                <tr>
-                    <th>Judul</th>
-                    <th>Jumlah Episode</th>
-                    <th>Total Durasi</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Podcast1</td>
-                    <td>0</td>
-                    <td>0 menit</td>
-                    <td>
-                        <button class="podcast-button" onclick="window.location.href='createpod_episode.html'">Lihat Daftar Episode</button>
-                        <button class="podcast-button">Tambah Episode</button>
-                        <button class="podcast-button">Hapus</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Podcast2</td>
-                    <td>2</td>
-                    <td>4 menit</td>
-                    <td>
-                        <button class="podcast-button" onclick="window.location.href='creadpo_podcast.html'">Lihat Daftar Episode</button>
-                        <button class="podcast-button">Tambah Episode</button>
-                        <button class="podcast-button">Hapus</button>
-                    </td>
-                </tr>
-                <!-- Add more podcast entries here -->
-            </tbody>
-        </table>
-    </div>
-
-</div>
-
-<!-- Include jQuery -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<!-- Include Bootstrap JS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.0/js/bootstrap.min.js"></script>
-<!-- Include Bootstrap Select JS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/js/bootstrap-select.min.js"></script>
-
-</body>
-</html>
-
-
-
-main\templates\createpod_episode.html:
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DAFTAR EPISODE PADA PODCAST1</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-
-        h1 {
-            margin-bottom: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #ccc;
-        }
-
-        th {
-            background-color: #f2f2f2;
-        }
-
-        td:last-child {
-            text-align: center;
-        }
-
-        .delete-button {
-            background-color: #dc3545;
-            color: #fff;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 3px;
-            cursor: pointer;
-        }
-
-        .delete-button:hover {
-            background-color: #c82333;
-        }
-
-        .create-episode {
-            margin-bottom: 40px; /* Menambahkan margin bottom agar terpisah dari daftar episode */
-        }
-
-        .create-episode form {
-            margin-bottom: 20px; /* Menambahkan margin bottom agar terpisah dari daftar episode */
-        }
-
-        .create-episode label {
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .create-episode input,
-        .create-episode select,
-        .create-episode textarea {
-            margin-bottom: 10px;
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-
-        .create-episode button {
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .create-episode button:hover {
-            background-color: #0056b3;
-        }
-    </style>
-</head>
-<body>
-
-<!-- CREATE EPISODE FORM -->
-<div class="section create-episode">
-    <h2>CREATE EPISODE</h2>
-    <form action="/add_episode" method="POST"> <!-- Ganti action dengan endpoint yang sesuai -->
-        <label for="episode-podcast">Podcast:</label>
-        <select id="episode-podcast" name="episode-podcast" required>
-            <option value="Podcast1">Podcast1</option>
-            <option value="Podcast2">Podcast2</option>
-            <!-- Add more podcast options here -->
-        </select><br>
-        
-        <label for="episode-title">Judul:</label>
-        <input type="text" id="episode-title" name="episode-title" required><br>
-        
-        <label for="episode-description">Deskripsi:</label>
-        <textarea id="episode-description" name="episode-description" required></textarea><br>
-        
-        <label for="episode-duration">Durasi:</label>
-        <input type="text" id="episode-duration" name="episode-duration" required><br>
-        
-        <button type="submit">SUBMIT</button>
-    </form>
-</div>
-
-<h1>DAFTAR EPISODE PADA PODCAST1</h1>
-
-<table>
-    <thead>
-        <tr>
-            <th>Judul Episode</th>
-            <th>Deskripsi</th>
-            <th>Durasi</th>
-            <th>Tanggal</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>SubJudul1</td>
-            <td>Lorem Ipsum ....</td>
-            <td>59 menit</td>
-            <td>18/03/2024</td>
-            <td><button class="delete-button">Hapus</button></td>
-        </tr>
-        <tr>
-            <td>SubJudul2</td>
-            <td>Lorem Ipsum ....</td>
-            <td>1 jam 2 menit</td>
-            <td>25/03/2024</td>
-            <td><button class="delete-button">Hapus</button></td>
-        </tr>
-        <!-- Add more episode entries here -->
-    </tbody>
-</table>
-
-</body>
-</html>
-
-
-
-main\templates\daily.html:
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chart Detail</title>
-    <style>
-        /* CSS styling */
-        body {
-            font-family: Arial, sans-serif;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 8px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        tr:hover {
-            background-color: #f2f2f2;
-        }
-        .back-button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .back-button:hover {
-            background-color: #0056b3;
-        }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <!-- Chart Detail -->
-    <h2>CHART DETAIL</h2>
-    <p><strong>Tipe:</strong> Daily Top 20</p>
-
-    <!-- Back Button -->
-    <button class="back-button" onclick="goBack()">Kembali</button>
-
-    <!-- Song List -->
-    <h2>DAFTAR LAGU</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Judul Lagu</th>
-                <th>Oleh</th>
-                <th>Tanggal Rilis</th>
-                <th>Total Plays</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>Song1</td>
-                <td>Artist1</td>
-                <td>09/03/2024</td>
-                <td>21000</td>
-                <td><a href="#">Lihat</a></td>
-            </tr>
-            <tr>
-                <td>Song2</td>
-                <td>Artist2</td>
-                <td>02/03/2024</td>
-                <td>19000</td>
-                <td><a href="#">Lihat</a></td>
-            </tr>
-            <!-- Add more song entries here -->
-        </tbody>
-    </table>
-</div>
-
-<!-- Script to go back to previous page -->
-<script>
-    function goBack() {
-        window.history.back();
-    }
-</script>
-
-</body>
-</html>
-
-
-
-main\templates\dashboard.html:
-{% extends 'base.html' %}
-
-{% block content %}
-
-    <div class="container my-5">
-        <h2 class="mb-4">Dashboard</h2>
-        <div class="form-box">
-            <div class="mb-3">
-                <label class="form-label">Nama:</label>
-                <p>{{ user.name }}</p>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Email:</label>
-                <p>{{ user.email }}</p>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Kota Asal:</label>
-                <p>{{ user.city }}</p>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Gender:</label>
-                <p>{{ user.gender }}</p>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Tempat Lahir:</label>
-                <p>{{ user.birth_place }}</p>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Tanggal Lahir:</label>
-                <p>{{ user.birth_date }}</p>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Role:</label>
-                <p>{{ user.role }}</p>
-            </div>
-
-            <h4 class="mb-3">Daftar Playlist</h4>
-            {% if user.playlists %}
-                <table class="table table-dark">
-                    <thead>
-                        <tr>
-                            <th>Judul</th>
-                            <th>Jumlah Lagu</th>
-                            <th>Tanggal Dibuat</th>
-                            <th>Total Durasi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for playlist in user.playlists %}
-                            <tr>
-                                <td>{{ playlist.name }}</td>
-                                <td>{{ playlist.song_count }}</td>
-                                <td>{{ playlist.created_at }}</td>
-                                <td>{{ playlist.total_duration }}</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <p>Belum Memiliki Playlist</p>
-            {% endif %}
-        </div>
-    </div>
-
-
-{% endblock %}
-
-
-
-
-main\templates\login.html:
-{% extends 'base.html' %}
-{% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="form-box">
-                <h2 class="mb-3">Login</h2>
-                {% if messages %}
-                <ul>
-                    {% for message in messages %}
-                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-                    {% endfor %}
-                </ul>
-                {% endif %}
-                <form method="post" action="{% url 'main:login' %}">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="text" class="form-control" id="email" name="email" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
-                    </div>
-                    <button type="submit" class="btn btn-cyan">Login</button>
-                </form>
-            </div>
-        </div>
-    </form>
-</div>
-{% endblock %}
-
-
-
-main\templates\login_and_register.html:
-{% extends 'base.html' %}
-
-{% block content %}
-<div class="container mt-5 d-flex justify-content-center">
-    <div class="form-box text-center" style="width: 50%; padding: 30px;">
-        <h1>Welcome To Marmut - a Music Platform</h1>
-        <h2>Marmut - B13</h2>
-        <p>Select Login or Register:</p>
-        <div class="btn-group-vertical" role="group" aria-label="Registration Type">
-            <!-- Button for Pengguna with cyan color -->
-            <button type="button" class="btn btn-cyan btn-lg mb-3" style="padding: 10px 20px;" onclick="window.location.href='{% url "main:login" %}'">Login</button>
-            <!-- Button for Label with pink color -->
-            <button type="button" class="btn btn-pink btn-lg" style="padding: 10px 20px;" onclick="window.location.href='{% url "main:register" %}'">Register</button>
-        </div>
-    </div>
-</div>
-{% endblock %}
-
-
-
-main\templates\main.html:
-ok gas
-
-
-main\templates\monthly.html:
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chart Detail</title>
-    <style>
-        /* CSS styling */
-        body {
-            font-family: Arial, sans-serif;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 8px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        tr:hover {
-            background-color: #f2f2f2;
-        }
-        .back-button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .back-button:hover {
-            background-color: #0056b3;
-        }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <!-- Chart Detail -->
-    <h2>CHART DETAIL</h2>
-    <p><strong>Tipe:</strong> Monthly Top 20</p>
-
-    <!-- Back Button -->
-    <button class="back-button" onclick="goBack()">Kembali</button>
-
-    <!-- Song List -->
-    <h2>DAFTAR LAGU</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Judul Lagu</th>
-                <th>Oleh</th>
-                <th>Tanggal Rilis</th>
-                <th>Total Plays</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>Song1</td>
-                <td>Artist1</td>
-                <td>09/03/2024</td>
-                <td>21000</td>
-                <td><a href="#">Lihat</a></td>
-            </tr>
-            <tr>
-                <td>Song2</td>
-                <td>Artist2</td>
-                <td>02/03/2024</td>
-                <td>19000</td>
-                <td><a href="#">Lihat</a></td>
-            </tr>
-            <!-- Add more song entries here -->
-        </tbody>
-    </table>
-</div>
-
-<!-- Script to go back to previous page -->
-<script>
-    function goBack() {
-        window.history.back();
-    }
-</script>
-
-</body>
-</html>
-
-
-
-main\templates\play_song.html:
-{% extends 'base.html' %}
-
-{% block content %}
-{% include 'navbar_guest.html' %} 
-<div class="container mt-4">
-    <div class="card bg-dark text-white">
-        <div class="card-header">
-            <h1>{{ song.title }}</h1>
-        </div>
-        <div class="card-body">
-            <h5 class="card-title">{{ song.artist }}</h5>
-            <p class="card-text"><strong>Genres:</strong>
-                {% for genre in song.genres %}
-                    <span class="badge bg-secondary">{{ genre }}</span>
-                {% endfor %}
-            </p>
-            <p class="card-text"><strong>Songwriters:</strong>
-                {% for songwriter in song.songwriters %}
-                    <span>{{ songwriter }}</span>{% if not forloop.last %}, {% endif %}
-                {% endfor %}
-            </p>
-            <p class="card-text"><strong>Duration:</strong> {{ song.duration }} minutes</p>
-            <p class="card-text"><strong>Release Date:</strong> {{ song.release_date }}</p>
-            <p class="card-text"><strong>Year:</strong> {{ song.year }}</p>
-            <p class="card-text"><strong>Album:</strong> {{ song.album }}</p>
-            <p class="card-text"><strong>Total Plays:</strong> {{ song.total_plays }}</p>
-            <p class="card-text"><strong>Total Downloads:</strong> {{ song.total_downloads }}</p>
-
-            <input type="range" id="songProgress" name="songProgress" class="form-range" min="0" max="100" value="0">
-            <button onclick="checkProgress()" class="btn btn-primary mt-2">Play</button>
-
-            <form method="POST" class="d-inline">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-info mt-2">Add to Playlist</button>
-            </form>
-
-            {% if user_is_premium %}
-                <form method="POST" class="d-inline">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-success mt-2">Download</button>
-                </form>
-            {% endif %}
-        </div>
-        <div class="card-footer text-muted">
-            <aclass="btn btn-outline-light">Back</a>
-        </div>
-    </div>
-</div>
-
-{% endblock %}
-
-
-
-main\templates\play_user_playlist.html:
-{% extends 'base.html' %}
-
-{% block content %}
-{% include 'navbar_guest.html' %} 
-<div class="container mt-4">
-    <div class="card bg-dark text-white">
-        <div class="card-header">
-            <h1>{{ playlist.title }}</h1>
-        </div>
-        <div class="card-body">
-            <h5 class="card-title">Created by: {{ playlist.creator }}</h5>
-            <p class="card-text"><strong>Number of Songs:</strong> {{ playlist.songs|length }}</p>
-            <p class="card-text"><strong>Total Duration:</strong> {{ playlist.total_duration_hours }} hours {{ playlist.total_duration_minutes }} minutes</p>
-            <p class="card-text"><strong>Created On:</strong> {{ playlist.created_date }}</p>
-            <p class="card-text"><strong>Description:</strong> {{ playlist.description }}</p>
-            
-            <button class="btn btn-primary mt-2" onclick="shufflePlay()">Shuffle Play</button>
-        </div>
-        <div class="card-footer text-muted">
-            <a  class="btn btn-outline-light">Back</a>
-        </div>
-    </div>
-
-    <div class="table-responsive mt-4">
-        <table class="table table-dark table-striped">
-            <thead>
-                <tr>
-                    <th>Title</th>
-                    <th>Artist</th>
-                    <th>Duration</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for song in playlist.songs %}
-                <tr>
-                    <td>{{ song.title }}</td>
-                    <td>{{ song.artist }}</td>
-                    <td>{{ song.duration }}</td>
-                    <td>
-                        <a class="btn btn-sm btn-secondary">View</a>
-                        <button class="btn btn-sm btn-info" >Play</button>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
-
-{% endblock %}
-
-
-
-main\templates\podcastdetail.html:
-{% extends 'base.html' %}
-
-{% block content %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Podcast Detail</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-
-<div class="podcast-detail">
-    <h2>PODCAST DETAIL</h2>
-    <div class="podcast-info">
-        <p><strong>Judul:</strong> Podcast18</p>
-        <p><strong>Genre(s):</strong></p>
-        <ul>
-            <li>Genre1</li>
-            <li>Genre2</li>
-        </ul>
-        <p><strong>Podcaster:</strong> Artist1</p>
-        <p><strong>Total Durasi:</strong> 8 jam 20 menit</p>
-        <p><strong>Tanggal Rilis:</strong> 18/03/24</p>
-        <p><strong>Tahun:</strong> 2024</p>
-    </div>
-    <a href="#" class="back-button">Kembali</a>
-
-</div>
-
-<div class="episode-list">
-    <h2>DAFTAR EPISODE</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Judul Episode</th>
-                <th>Deskripsi</th>
-                <th>Durasi</th>
-                <th>Tanggal</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>SubJudul1</td>
-                <td>Lorem Ipsum ....</td>
-                <td>59 menit</td>
-                <td>18/03/2024</td>
-            </tr>
-            <tr>
-                <td>SubJudul2</td>
-                <td>Lorem Ipsum ....</td>
-                <td>1 jam 2 menit</td>
-                <td>25/03/2024</td>
-            </tr>
-            <!-- Data episode lainnya -->
-        </tbody>
-    </table>
-    
-</div>
-
-</body>
-</html>
-
-<style>
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-}
-
-.podcast-detail, .episode-list {
-    width: 80%;
-    margin: 20px auto;
-}
-
-h2 {
-    margin-bottom: 10px;
-}
-
-.podcast-info {
-    margin-bottom: 20px;
-}
-
-.podcast-info p {
-    margin: 5px 0;
-}
-
-.podcast-info ul {
-    margin-top: 5px;
-}
-
-.back-button, .create-button, .chart-button {
-    display: inline-block;
-    padding: 5px 10px;
-    border-radius: 5px;
-    text-decoration: none;
-}
-
-.back-button {
-    background-color: #007bff;
-    color: #fff;
-}
-
-.create-button {
-    background-color: #dc3545; /* Warna merah */
-    color: #fff;
-    margin-left: 10px; /* Jarak antara tombol */
-}
-
-.chart-button {
-    background-color: #28a745; /* Warna hijau */
-    color: #fff;
-    margin-left: 10px; /* Jarak antara tombol */
-}
-
-.back-button:hover, .create-button:hover, .chart-button:hover {
-    background-color: #0056b3; /* Warna merah lebih tua */
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-th, td {
-    padding: 8px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-}
-
-tr:hover {
-    background-color: #f2f2f2;
-}
-</style>
-
-{% endblock content %}
-
-
-
-main\templates\register.html:
-{% extends 'base.html' %}
-
-{% block content %}
-<div class="container mt-5 d-flex justify-content-center">
-    <div class="form-box text-center" style="width: 50%; padding: 30px;">
-        <h2>Register</h2>
-        <p>Select your registration type:</p>
-        <div class="btn-group-vertical" role="group" aria-label="Registration Type">
-            <!-- Button for Pengguna with cyan color -->
-            <button type="button" class="btn btn-cyan btn-lg mb-3" style="padding: 10px 20px;" onclick="window.location.href='{% url "main:register_user" %}'">Pengguna</button>
-            <!-- Button for Label with pink color -->
-            <button type="button" class="btn btn-pink btn-lg" style="padding: 10px 20px;" onclick="window.location.href='{% url "main:register_label" %}'">Label</button>
-        </div>
-    </div>
-</div>
-{% endblock %}
-
-
-
-main\templates\register_label.html:
-{% extends 'base.html' %}
-
-{% block content %}
-<div class="container">
-    
-    <div class="form-box">
-        <h2>FORM REGISTRASI - Label</h2>
-        {% if messages %}
-        <ul>
-            {% for message in messages %}
-            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
-        <form action="{% url 'main:register_label' %}" method="POST">
-            {% csrf_token %}
-            <label for="email" class="form-label">Email:</label>
-            <input type="email" id="email" name="email" required class="form-control"><br>
-
-            <label for="password" class="form-label">Password:</label>
-            <input type="password" id="password" name="password" required class="form-control"><br>
-
-            <label for="name" class="form-label">Nama:</label>
-            <input type="text" id="name" name="name" required class="form-control"><br>
-
-            <label for="contact" class="form-label">Kontak:</label>
-            <input type="text" id="contact" name="contact" required class="form-control"><br>
-
-            <button type="submit" class="btn btn-cyan">Register</button>
-        </form>
-    </div>
-</div>
-{% endblock %}
-
-
-
-main\templates\register_user.html:
-{% extends 'base.html' %}
-
-{% block content %}
-<div class="container">
-    <div class="form-box">
-        <h2>FORM REGISTRASI</h2>
-        {% if messages %}
-        <ul>
-            {% for message in messages %}
-            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
-        <form action="{% url 'main:register_user' %}" method="POST">
-            {% csrf_token %}
-            <label for="email" class="form-label">Email:</label>
-            <input type="email" id="email" name="email" required class="form-control"><br>
-
-            <label for="password" class="form-label">Password:</label>
-            <input type="password" id="password" name="password" required class="form-control"><br>
-
-            <label for="name" class="form-label">Nama:</label>
-            <input type="text" id="name" name="name" required class="form-control"><br>
-
-            <label for="gender" class="form-label">Gender:</label>
-            <select id="gender" name="gender" class="form-control">
-                <option value="male">Laki-laki</option>
-                <option value="female">Perempuan</option>
-            </select><br>
-            
-            <label for="birthplace" class="form-label">Tempat Lahir :</label>
-            <input type="text" id="birthplace" name="birthplace" required class="form-control"><br>
-
-            <label for="birthdate" class="form-label">Tanggal lahir:</label>
-            <input type="date" id="birthdate" name="birthdate" required class="form-control"><br>
-
-            <label for="city" class="form-label">Kota asal:</label>
-            <input type="text" id="city" name="city" required class="form-control"><br>
-
-            <label class="form-label">Role:</label><br>
-            <input type="checkbox" id="podcaster" name="is_podcaster" value="True" class="form-check-input">
-            <label for="podcaster" class="form-check-label">Podcaster</label><br>
-
-            <input type="checkbox" id="artist" name="is_artist" value="True" class="form-check-input">
-            <label for="artist" class="form-check-label">Artist</label><br>
-
-            <input type="checkbox" id="songwriter" name="is_songwriter" value="True" class="form-check-input">
-            <label for="songwriter" class="form-check-label">Songwriter</label><br><br>
-
-            <button type="submit" class="btn btn-pink">Register</button>
-        </form>
-    </div>
-</div>
-{% endblock %}
-
-
-
-main\templates\seechart.html:
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chart List</title>
-    <style>
-        /* CSS styling */
-        body {
-            font-family: Arial, sans-serif;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 8px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        tr:hover {
-            background-color: #f2f2f2;
-        }
-        .back-button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .back-button:hover {
-            background-color: #0056b3;
-        }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <!-- Chart List -->
-    <h2>CHART LIST</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Tipe</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>Daily Top 20</td>
-                <td><a href="daily.html">Lihat Daftar Lagu</a></td>
-            </tr>
-            <tr>
-                <td>Weekly Top 20</td>
-                <td><a href="weekly.html">Lihat Daftar Lagu</a></td>
-            </tr>
-            <tr>
-                <td>Monthly Top 20</td>
-                <td><a href="monthly.html">Lihat Daftar Lagu</a></td>
-            </tr>
-            <tr>
-                <td>Yearly Top 20</td>
-                <td><a href="yearly.html">Lihat Daftar Lagu</a></td>
-            </tr>
-        </tbody>
-    </table>
-
-    <!-- Back Button -->
-    <button class="back-button" onclick="goBack()">Kembali</button>
-</div>
-
-<!-- Script to go back to previous page -->
-<script>
-    function goBack() {
-        window.history.back();
-    }
-</script>
-
-</body>
-</html>
-
-
-
-main\templates\weekly.html:
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chart Detail</title>
-    <style>
-        /* CSS styling */
-        body {
-            font-family: Arial, sans-serif;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 8px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        tr:hover {
-            background-color: #f2f2f2;
-        }
-        .back-button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .back-button:hover {
-            background-color: #0056b3;
-        }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <!-- Chart Detail -->
-    <h2>CHART DETAIL</h2>
-    <p><strong>Tipe:</strong> Weekly Top 20</p>
-
-    <!-- Back Button -->
-    <button class="back-button" onclick="goBack()">Kembali</button>
-
-    <!-- Song List -->
-    <h2>DAFTAR LAGU</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Judul Lagu</th>
-                <th>Oleh</th>
-                <th>Tanggal Rilis</th>
-                <th>Total Plays</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>Song1</td>
-                <td>Artist1</td>
-                <td>09/03/2024</td>
-                <td>21000</td>
-                <td><a href="#">Lihat</a></td>
-            </tr>
-            <tr>
-                <td>Song2</td>
-                <td>Artist2</td>
-                <td>02/03/2024</td>
-                <td>19000</td>
-                <td><a href="#">Lihat</a></td>
-            </tr>
-            <!-- Add more song entries here -->
-        </tbody>
-    </table>
-</div>
-
-<!-- Script to go back to previous page -->
-<script>
-    function goBack() {
-        window.history.back();
-    }
-</script>
-
-</body>
-</html>
-
-
-
-main\templates\yearly.html:
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chart Detail</title>
-    <style>
-        /* CSS styling */
-        body {
-            font-family: Arial, sans-serif;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 8px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        tr:hover {
-            background-color: #f2f2f2;
-        }
-        .back-button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .back-button:hover {
-            background-color: #0056b3;
-        }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <!-- Chart Detail -->
-    <h2>CHART DETAIL</h2>
-    <p><strong>Tipe:</strong> Yearly Top 20</p>
-
-    <!-- Back Button -->
-    <button class="back-button" onclick="goBack()">Kembali</button>
-
-    <!-- Song List -->
-    <h2>DAFTAR LAGU</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Judul Lagu</th>
-                <th>Oleh</th>
-                <th>Tanggal Rilis</th>
-                <th>Total Plays</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>Song1</td>
-                <td>Artist1</td>
-                <td>09/03/2024</td>
-                <td>21000</td>
-                <td><a href="#">Lihat</a></td>
-            </tr>
-            <tr>
-                <td>Song2</td>
-                <td>Artist2</td>
-                <td>02/03/2024</td>
-                <td>19000</td>
-                <td><a href="#">Lihat</a></td>
-            </tr>
-            <!-- Add more song entries here -->
-        </tbody>
-    </table>
-</div>
-
-<!-- Script to go back to previous page -->
-<script>
-    function goBack() {
-        window.history.back();
-    }
-</script>
-
-</body>
-</html>
-
-
-
-static\css\style.css:
-/* static/css/style.css */
-h1, h5, p {
-    transition: opacity 2s ease-in-out;
-    opacity: 0;
-}
-
-body:hover h1, body:hover h5, body:hover p {
-    opacity: 1;
-}
-
-
-main\static\css\style.css:
-/* static/css/style.css */
-h1, h5, p {
-    transition: opacity 2s ease-in-out;
-    opacity: 0;
-}
-
-body:hover h1, body:hover h5, body:hover p {
-    opacity: 1;
-}
-
-
-marmut\asgi.py:
-"""
-ASGI config for marmut project.
-
-It exposes the ASGI callable as a module-level variable named ``application``.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/4.2/howto/deployment/asgi/
-"""
-
-import os
-
-from django.core.asgi import get_asgi_application
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "marmut.settings")
-
-application = get_asgi_application()
-
-
-
-marmut\settings.py:
-"""
-Django settings for marmut project.
-
-Generated by 'django-admin startproject' using Django 4.2.4.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/4.2/topics/settings/
-
-For the full list of settings and their values, see
-https://docs.djangoproject.com/en/4.2/ref/settings/
-"""
-
-from pathlib import Path
-import environ # Tambahkan kode berikut
-import os # Tambahkan kode berikut
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-env = environ.Env() # Tambahkan kode berikut
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-5dgque*$6nl$6wj!p#7%6b=ot92+jm@f%!(*9-2tz!3=&n&+*w"
-
-PRODUCTION = env.bool('PRODUCTION', False)
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ["*"]
-
-
-# Application definition
-
-INSTALLED_APPS = [
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
-    "main",
-    "playlist",
-    "langganan",
-    "song",
-    "royalty_management",
-]
-
-LOGIN_URL = 'main:login'  # Change to your actual login URL
-LOGIN_REDIRECT_URL = 'main:home'  # Change to the URL you want to redirect to after login
-LOGOUT_REDIRECT_URL = 'main:login'  # Change to your actual logout redirect URL
-
-
-AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-]
-
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-SESSION_COOKIE_AGE = 1209600  # Two weeks
-SESSION_SAVE_EVERY_REQUEST = True
-
-
-
-MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
-
-ROOT_URLCONF = "marmut.urls"
-
-TEMPLATES = [
-    {
-        "BACKEND": "django.template.backends.django.DjangoTemplates",
-        'DIRS': [BASE_DIR / 'templates'],
-        "APP_DIRS": True,
-        "OPTIONS": {
-            "context_processors": [
-                "django.template.context_processors.debug",
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
-            ],
-        },
-    },
-]
-
-WSGI_APPLICATION = "marmut.wsgi.application"
-
-
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
-
-if PRODUCTION:
-    DATABASES = {
-        'default': env.db('DATABASE_URL')
-    }
-    DATABASES["default"]["ATOMIC_REQUESTS"] = True
-
-
-# Password validation
-# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",},
-    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",},
-    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
-]
-
-
-# Internationalization
-# https://docs.djangoproject.com/en/4.2/topics/i18n/
-
-LANGUAGE_CODE = "en-us"
-
-TIME_ZONE = "UTC"
-
-USE_I18N = True
-
-USE_TZ = True
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
-
-STATIC_URL = "static/"
-
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-
-
-marmut\urls.py:
-from django.contrib import admin
-from django.urls import path, include
-
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include('main.urls')),
-    path('playlist/', include('playlist.urls')),
-    path('langganan/', include('langganan.urls', namespace='langganan')),
-    path('song/', include('song.urls')),
-    path('royalty_management/', include('royalty_management.urls')),
-]
-
-
-
-marmut\wsgi.py:
-"""
-WSGI config for marmut project.
-
-It exposes the WSGI callable as a module-level variable named ``application``.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/4.2/howto/deployment/wsgi/
-"""
-
-import os
-
-from django.core.wsgi import get_wsgi_application
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "marmut.settings")
-
-application = get_wsgi_application()
-
-
-
-marmut\__init__.py:
 
 
 

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Royalty Overview</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #333;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            border: 1px solid #777;
+            text-align: left;
+        }
+        th {
+            background-color: #555;
+        }
+        td {
+            background-color: #444;
+        }
+        a {
+            color: #8dbf42;
+            text-decoration: none;
+        }
+        .container {
+            width: 90%;
+            margin: auto;
+        }
+        h1 {
+            border-bottom: 1px solid #555;
+            padding-bottom: 5px;
+        }
+        .no-data {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 18px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>My Royalty Details</h1>
+        {% if royalty_data %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Song</th>
+                    <th>Album</th>
+                    <th>Total Play</th>
+                    <th>Total Download</th>
+                    <th>Total Royalties Earned (in Rp)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for royalty in royalty_data %}
+                <tr>
+                    <td>{{ royalty.judul_lagu }}</td>
+                    <td>{{ royalty.judul_album }}</td>
+                    <td>{{ royalty.total_play }}</td>
+                    <td>{{ royalty.total_download }}</td>
+                    <td>Rp {{ royalty.total_royalty_didapat }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="no-data">No royalty to show</div>
+        {% endif %}
+    </div>
+</body>
+</html>

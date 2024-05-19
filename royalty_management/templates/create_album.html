@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Songs and Albums</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #333;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            border: 1px solid #777;
+            text-align: left;
+        }
+        th {
+            background-color: #555;
+        }
+        td {
+            background-color: #444;
+        }
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            border: none;
+            border-radius: 4px;
+        }
+        select {
+            display: none;
+        }
+        select:valid {
+            display: block;
+        }
+        .button {
+            background-color: #666;
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #777;
+        }
+        .form-section {
+            background-color: #222;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        label {
+            color: #ccc;
+        }
+        .container {
+            width: 90%;
+            margin: auto;
+        }
+        h1, h2 {
+            border-bottom: 1px solid #555;
+            padding-bottom: 5px;
+        }
+        .dropdown-label {
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Manage Songs and Albums</h1>
+
+        <!-- Create Album and Add First Song Form -->
+        <div class="form-section">
+            <h2>Create Album</h2>
+            <form action="{% url 'create_album' %}" method="POST">
+                {% csrf_token %}
+                <label for="album_title">Album Title:</label>
+                <input type="text" id="album_title" name="judul_album" required>
+
+                <label for="album_label" class="dropdown-label">Label:</label>
+                <select id="album_label" name="label">
+                    {% for label in labels %}
+                    <option value="{{ label.id }}">{{ label.nama }}</option>
+                    {% endfor %}
+                </select>
+
+                <h3>Add First Song to New Album</h3>
+                
+                <label for="song_title">Song Title:</label>
+                <input type="text" id="song_title" name="judul_lagu" required>
+                <br>
+
+                {% if is_artist %}
+                    <input type="hidden" name="artist" value="{{ user_email }}">
+                    
+                    <label for="songwriters">Songwriter:</label>
+                    <select id="songwriters" name="songwriters" multiple required>
+                        {% for songwriter in songwriters %}
+                        <option value="{{ songwriter.id }}" {% if songwriter.email == user_email %}selected{% endif %}>{{ songwriter.nama }}</option>
+                        {% endfor %}
+                    </select> <br>
+                {% elif is_songwriter %}
+                    <label for="artist">Artist:</label>
+                    <select id="artist" name="artist" required>
+                        <option value="" disabled selected>Artist</option>
+                        {% for artist in artists %}
+                        <option value="{{ artist.id }}">{{ artist.nama }}</option>
+                        {% endfor %}
+                    </select> <br>
+                    
+                    <input type="hidden" name="songwriters" value="{{ user_email }}">
+                    
+                    <label for="songwriters">Additional Songwriters:</label>
+                    <select id="songwriters" name="songwriters" multiple required>
+                        {% for songwriter in songwriters %}
+                        <option value="{{ songwriter.id }}" {% if songwriter.email == user_email %}selected{% endif %}>{{ songwriter.nama }}</option>
+                        {% endfor %}
+                    </select> <br>
+                {% endif %}
+
+                <label for="genres" class="dropdown-label">Genre:</label>
+                <div id="genre_checkbox_group">
+                    {% for genre in genres %}
+                    <div>
+                        <input type="checkbox" id="genre_{{ genre.genre }}" name="genres" value="{{ genre.genre }}">
+                        <label for="genre_{{ genre.genre }}">{{ genre.genre }}</label>
+                    </div>
+                    {% endfor %}
+                </div><br>
+
+                <label for="duration">Duration (minutes):</label>
+                <input type="number" id="duration" name="durasi" required>
+
+                <button type="submit" class="button">Submit</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
