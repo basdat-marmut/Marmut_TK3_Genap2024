@@ -36,17 +36,17 @@
                     {% endif %}
                     {% if navbar.is_artist or navbar.is_songwriter %}
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Kelola Album & Songs</a>
+                            <a class="nav-link" href="{% url 'royalty_management:view_album' %}">Kelola Album & Songs</a>
                         </li>
                     {% endif %}
                     {% if navbar.is_label %}
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Kelola Album</a>
+                            <a class="nav-link" href="{% url 'royalty_management:view_album_label' %}">Kelola Album</a>
                         </li>
                     {% endif %}
                     {% if navbar.is_artist or navbar.is_songwriter or navbar.is_label %}
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Cek Royalti</a>
+                            <a class="nav-link" href="{% url 'royalty_management:view_royalty' %}">Cek Royalti</a>
                         </li>
                     {% endif %}
                     <li class="nav-item">
