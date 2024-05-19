@@ -68,21 +68,22 @@
     <!-- CREATE PODCAST FORM -->
     <div class="section create-podcast">
         <h2>CREATE PODCAST</h2>
-        <form action="#" method="POST">
+        <form id="create-podcast-form" method="POST">
+            {% csrf_token %}
             <label for="podcast-title">Judul:</label>
             <input type="text" id="podcast-title" name="podcast-title" required><br>
-            
+
             <label for="podcast-genre">Genre:</label>
-            <!-- Multiselect Dropdown for Genre -->
-            <select id="podcast-genre" name="podcast-genre" class="selectpicker" multiple required>
-                <option value="genre1">Genre 1</option>
-                <option value="genre2">Genre 2</option>
-                <!-- Add more genre options here -->
+            <!-- Dropdown for Genre -->
+            <select id="podcast-genre" name="podcast-genre" required>
+                <option value="Romance">Romance</option>
+                <option value="Comedy">Comedy</option>
+                <!-- Add more genres as needed -->
             </select><br>
             
             <label for="podcast-duration">Durasi:</label>
             <input type="text" id="podcast-duration" name="podcast-duration" required><br>
-            
+
             <button type="submit">SUBMIT</button>
         </form>
     </div>
@@ -99,28 +100,19 @@
                     <th>Action</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr>
-                    <td>Podcast1</td>
-                    <td>0</td>
-                    <td>0 menit</td>
+            <tbody id="podcast-list">
+                {% for podcast in podcasts %}
+                <tr id="podcast-{{ podcast.id_konten }}" data-id="{{ podcast.id_konten }}">
+                    <td>{{ podcast.judul }}</td>
+                    <td>{{ podcast.jumlah_episode }}</td>
+                    <td>{{ podcast.total_durasi }}</td>
                     <td>
-                        <button class="podcast-button" onclick="window.location.href='createpod_episode.html'">Lihat Daftar Episode</button>
-                        <button class="podcast-button">Tambah Episode</button>
-                        <button class="podcast-button">Hapus</button>
+                        <button class="podcast-button" onclick="redirectToEpisodePage('{{ podcast.id_konten }}')">Lihat Daftar Episode</button>
+                        <button class="podcast-button" onclick="addEpisode('{{ podcast.id_konten }}')">Tambah Episode</button>
+                        <button class="podcast-button" onclick="deletePodcast('{{ podcast.id_konten }}')">Hapus</button>
                     </td>
                 </tr>
-                <tr>
-                    <td>Podcast2</td>
-                    <td>2</td>
-                    <td>4 menit</td>
-                    <td>
-                        <button class="podcast-button" onclick="window.location.href='creadpo_podcast.html'">Lihat Daftar Episode</button>
-                        <button class="podcast-button">Tambah Episode</button>
-                        <button class="podcast-button">Hapus</button>
-                    </td>
-                </tr>
-                <!-- Add more podcast entries here -->
+                {% endfor %}
             </tbody>
         </table>
     </div>
@@ -133,6 +125,75 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.0/js/bootstrap.min.js"></script>
 <!-- Include Bootstrap Select JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/js/bootstrap-select.min.js"></script>
+
+<script>
+    function redirectToEpisodePage(podcastId) {
+        window.location.href = '{% url "main:createpodepisode" %}?podcast_id=' + podcastId;
+    }
+
+    function deletePodcast(podcastId) {
+        if (confirm('Apakah Anda yakin ingin menghapus podcast ini?')) {
+            $.ajax({
+                url: '{% url "main:deletePodcast" %}',
+                method: 'GET',
+                data: {
+                    'podcast_id': podcastId
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Remove the podcast row from the table
+                        $('#podcast-' + podcastId).remove();
+                    } else {
+                        alert('Gagal menghapus podcast.');
+                    }
+                }
+            });
+        }
+    }
+
+    function addEpisode(podcastId) {
+        // Mengarahkan pengguna ke halaman penambahan episode
+        window.location.href = '{% url "main:addEpisode" %}?podcast_id=' + podcastId;
+    }
+
+    $(document).ready(function() {
+        $('.selectpicker').selectpicker();
+
+        // Handle form submission with AJAX
+        $('#create-podcast-form').on('submit', function(event) {
+            event.preventDefault();
+
+            var formData = $(this).serialize();
+
+            $.ajax({
+                url: '/createpod/',  // Update with the correct endpoint
+                method: 'POST',
+                data: formData,
+                success: function(response) {
+                    if (response.success) {
+                        // Add new podcast to the list
+                        var newPodcast = '<tr id="podcast-' + response.podcast.id_konten + '" data-id="' + response.podcast.id_konten + '">' +
+                            '<td>' + response.podcast.judul + '</td>' +
+                            '<td>' + response.podcast.jumlah_episode + '</td>' +
+                            '<td>' + response.podcast.total_durasi + '</td>' +
+                            '<td>' +
+                            '<button class="podcast-button" onclick="redirectToEpisodePage(\'' + response.podcast.id_konten + '\')">Lihat Daftar Episode</button>' +
+                            '<button class="podcast-button" onclick="addEpisode(\'' + response.podcast.id_konten + '\')">Tambah Episode</button>' +
+                            '<button class="podcast-button" onclick="deletePodcast(\'' + response.podcast.id_konten + '\')">Hapus</button>' +
+                            '</td>' +
+                            '</tr>';
+                        $('#podcast-list').append(newPodcast);
+                        // Clear the form
+                        $('#create-podcast-form')[0].reset();
+                        $('.selectpicker').selectpicker('refresh');
+                    } else {
+                        alert('Gagal menambah podcast.');
+                    }
+                }
+            });
+        });
+    });
+</script>
 
 </body>
 </html>

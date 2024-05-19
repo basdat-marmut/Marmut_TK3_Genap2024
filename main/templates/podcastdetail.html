@@ -1,66 +1,57 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Podcast Detail</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
+<div class="container mt-5">
+    <h2>Podcast Details</h2>
 
-<div class="podcast-detail">
-    <h2>PODCAST DETAIL</h2>
+    {% for podcast in podcasts %}
     <div class="podcast-info">
-        <p><strong>Judul:</strong> Podcast18</p>
-        <p><strong>Genre(s):</strong></p>
-        <ul>
-            <li>Genre1</li>
-            <li>Genre2</li>
-        </ul>
-        <p><strong>Podcaster:</strong> Artist1</p>
-        <p><strong>Total Durasi:</strong> 8 jam 20 menit</p>
-        <p><strong>Tanggal Rilis:</strong> 18/03/24</p>
-        <p><strong>Tahun:</strong> 2024</p>
+        <h3>{{ podcast.judul_podcast }}</h3> <!-- Tambahkan judul podcast di sini -->
+        <div class="details-container">
+            <div class="left-column">
+                <p><strong>Podcaster:</strong> {{ podcast.podcaster.nama }}</p>
+                <p><strong>Release Date:</strong> {{ podcast.earliest_release_date|date:"d/m/Y" }}</p>
+                <p><strong>Year:</strong> {{ podcast.year }}</p>
+            </div>
+            <div class="right-column">
+                <p><strong>Genre(s):</strong> 
+                {% for genre in podcast.genres %}
+                    {{ genre }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+                </p>
+                <p><strong>Total Duration:</strong> {{ podcast.total_duration_hours }} hours {{ podcast.remaining_minutes }} minutes</p>
+            </div>
+        </div>
     </div>
-    <a href="#" class="back-button">Kembali</a>
 
+    <div class="episode-list">
+        <h4>Episodes</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>Episode Title</th>
+                    <th>Description</th>
+                    <th>Duration</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for episode in podcast.episodes %}
+                <tr>
+                    <td>{{ episode.judul }}</td>
+                    <td>{{ episode.deskripsi }}</td>
+                    <td>{{ episode.durasi }} minutes</td>
+                    <td>{{ episode.tanggal_rilis|date:"d/m/Y" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <hr>
+    {% endfor %}
+
+    <a href="javascript:history.back()" class="back-button">Kembali</a>
 </div>
-
-<div class="episode-list">
-    <h2>DAFTAR EPISODE</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Judul Episode</th>
-                <th>Deskripsi</th>
-                <th>Durasi</th>
-                <th>Tanggal</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>SubJudul1</td>
-                <td>Lorem Ipsum ....</td>
-                <td>59 menit</td>
-                <td>18/03/2024</td>
-            </tr>
-            <tr>
-                <td>SubJudul2</td>
-                <td>Lorem Ipsum ....</td>
-                <td>1 jam 2 menit</td>
-                <td>25/03/2024</td>
-            </tr>
-            <!-- Data episode lainnya -->
-        </tbody>
-    </table>
-    
-</div>
-
-</body>
-</html>
 
 <style>
 body {
@@ -69,12 +60,12 @@ body {
     padding: 0;
 }
 
-.podcast-detail, .episode-list {
+.container {
     width: 80%;
     margin: 20px auto;
 }
 
-h2 {
+h2, h3, h4 {
     margin-bottom: 10px;
 }
 
@@ -82,56 +73,46 @@ h2 {
     margin-bottom: 20px;
 }
 
-.podcast-info p {
+.details-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.left-column, .right-column {
+    width: 45%;
+}
+
+.left-column p, .right-column p {
     margin: 5px 0;
 }
 
-.podcast-info ul {
-    margin-top: 5px;
-}
-
-.back-button, .create-button, .chart-button {
+.back-button {
     display: inline-block;
     padding: 5px 10px;
     border-radius: 5px;
     text-decoration: none;
-}
-
-.back-button {
     background-color: #007bff;
     color: #fff;
 }
 
-.create-button {
-    background-color: #dc3545; /* Warna merah */
-    color: #fff;
-    margin-left: 10px; /* Jarak antara tombol */
-}
-
-.chart-button {
-    background-color: #28a745; /* Warna hijau */
-    color: #fff;
-    margin-left: 10px; /* Jarak antara tombol */
-}
-
-.back-button:hover, .create-button:hover, .chart-button:hover {
-    background-color: #0056b3; /* Warna merah lebih tua */
+.back-button:hover {
+    background-color: #0056b3;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
+    margin-top: 10px;
 }
 
 th, td {
     padding: 8px;
     text-align: left;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid #1fd2d5;
 }
 
 tr:hover {
-    background-color: #f2f2f2;
+    background-color: #2ada59;
 }
 </style>
-
-{% endblock content %}
+{% endblock %}

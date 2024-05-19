@@ -55,20 +55,21 @@
         <tbody>
             <tr>
                 <td>Daily Top 20</td>
-                <td><a href="daily.html">Lihat Daftar Lagu</a></td>
+                <td><a href="{% url 'main:daily'%}">Lihat Daftar Lagu</a></td>
             </tr>
             <tr>
                 <td>Weekly Top 20</td>
-                <td><a href="weekly.html">Lihat Daftar Lagu</a></td>
+                <td><a href="{% url 'main:weekly'%}">Lihat Daftar Lagu</a></td>
             </tr>
             <tr>
                 <td>Monthly Top 20</td>
-                <td><a href="monthly.html">Lihat Daftar Lagu</a></td>
+                <td><a href="{% url 'main:monthly'%}">Lihat Daftar Lagu</a></td>
             </tr>
             <tr>
                 <td>Yearly Top 20</td>
-                <td><a href="yearly.html">Lihat Daftar Lagu</a></td>
+                <td><a href="{% url 'main:yearly'%}">Lihat Daftar Lagu</a></td>
             </tr>
+
         </tbody>
     </table>
 
