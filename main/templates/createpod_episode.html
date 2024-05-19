@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DAFTAR EPISODE PADA PODCAST1</title>
+    <title>Create Podcast Episode</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -47,11 +47,11 @@
         }
 
         .create-episode {
-            margin-bottom: 40px; /* Menambahkan margin bottom agar terpisah dari daftar episode */
+            margin-bottom: 40px;
         }
 
         .create-episode form {
-            margin-bottom: 20px; /* Menambahkan margin bottom agar terpisah dari daftar episode */
+            margin-bottom: 20px;
         }
 
         .create-episode label {
@@ -86,16 +86,12 @@
 </head>
 <body>
 
-<!-- CREATE EPISODE FORM -->
-<div class="section create-episode">
-    <h2>CREATE EPISODE</h2>
-    <form action="/add_episode" method="POST"> <!-- Ganti action dengan endpoint yang sesuai -->
+<div class="create-episode">
+    <h2>Create Episode</h2>
+    <form action="/home/createpod_episode/" method="POST">
+        {% csrf_token %}
         <label for="episode-podcast">Podcast:</label>
-        <select id="episode-podcast" name="episode-podcast" required>
-            <option value="Podcast1">Podcast1</option>
-            <option value="Podcast2">Podcast2</option>
-            <!-- Add more podcast options here -->
-        </select><br>
+        <input type="text" id="episode-podcast" name="episode-podcast" readonly required><br>
         
         <label for="episode-title">Judul:</label>
         <input type="text" id="episode-title" name="episode-title" required><br>
@@ -106,40 +102,34 @@
         <label for="episode-duration">Durasi:</label>
         <input type="text" id="episode-duration" name="episode-duration" required><br>
         
-        <button type="submit">SUBMIT</button>
+        <button type="submit">Submit</button>
     </form>
 </div>
 
-<h1>DAFTAR EPISODE PADA PODCAST1</h1>
+<!-- Include jQuery -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
-<table>
-    <thead>
-        <tr>
-            <th>Judul Episode</th>
-            <th>Deskripsi</th>
-            <th>Durasi</th>
-            <th>Tanggal</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>SubJudul1</td>
-            <td>Lorem Ipsum ....</td>
-            <td>59 menit</td>
-            <td>18/03/2024</td>
-            <td><button class="delete-button">Hapus</button></td>
-        </tr>
-        <tr>
-            <td>SubJudul2</td>
-            <td>Lorem Ipsum ....</td>
-            <td>1 jam 2 menit</td>
-            <td>25/03/2024</td>
-            <td><button class="delete-button">Hapus</button></td>
-        </tr>
-        <!-- Add more episode entries here -->
-    </tbody>
-</table>
+<script>
+    $(document).ready(function() {
+        // Function to get URL parameters
+        function getParameterByName(name, url = window.location.href) {
+            name = name.replace(/[\[\]]/g, '\\$&');
+            let regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
+            let results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, ' '));
+        }
+
+        // Get podcast id and title from URL parameters
+        let podcastJudul = getParameterByName('podcast_judul');
+
+        // Set the podcast title in the form
+        if (podcastJudul) {
+            $('#episode-podcast').val(podcastJudul);
+        }
+    });
+</script>
 
 </body>
 </html>

@@ -24,7 +24,7 @@
             border-bottom: 1px solid #ddd;
         }
         tr:hover {
-            background-color: #f2f2f2;
+            background-color: #1fd2d5;
         }
         .back-button {
             margin-top: 20px;
@@ -63,21 +63,15 @@
             </tr>
         </thead>
         <tbody>
+            {% for song in songs %}
             <tr>
-                <td>Song1</td>
-                <td>Artist1</td>
-                <td>09/03/2024</td>
-                <td>21000</td>
-                <td><a href="#">Lihat</a></td>
+                <td>{{ song.0 }}</td>
+                <td>{{ song.1 }}</td>
+                <td>{{ song.2 }}</td>
+                <td>{{ song.3 }}</td>
+                <td><a href="{% url 'main:song_detail' song_judul=song.0 %}" class="btn btn-info">Lihat</a></td>
             </tr>
-            <tr>
-                <td>Song2</td>
-                <td>Artist2</td>
-                <td>02/03/2024</td>
-                <td>19000</td>
-                <td><a href="#">Lihat</a></td>
-            </tr>
-            <!-- Add more song entries here -->
+            {% endfor %}
         </tbody>
     </table>
 </div>
@@ -91,3 +85,4 @@
 
 </body>
 </html>
+

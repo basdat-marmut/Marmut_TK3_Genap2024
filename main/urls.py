@@ -12,7 +12,10 @@ from main.views import daily
 from main.views import weekly
 from main.views import monthly
 from main.views import yearly
-from main.views import podetail
+from main.views import song_detail
+from main.views import podcastdetail
+from main.views import addEpisode
+from main.views import deletePodcast
 from main.views import download_song, add_song_to_playlist, user_play_song, shuffle_playlist
 
 app_name = 'main'
@@ -41,5 +44,17 @@ urlpatterns = [
     path('download-song/<str:id>/', download_song, name='download_song'),
     path('add-song-to-playlist/', add_song_to_playlist, name='add_song_to_playlist'),
     path('user-play-song/<str:id>/', user_play_song, name='user_play_song'),
-    path('shuffle-playlist/<str:id>/', shuffle_playlist, name='shuffle_playlist')
+    path('shuffle-playlist/<str:id>/', shuffle_playlist, name='shuffle_playlist'),
+    path('song/top/<str:song_judul>/', song_detail, name='song_detail'),
+    path('song/daily/', daily, name='daily'),
+    path('song/weekly/', weekly, name='weekly'),
+    path('song/monthly/', monthly, name='monthly'),
+    path('song/yearly/', yearly, name='yearly'),
+    path('podcastdetail.html/', podcastdetail, name='podcastdetail'),
+
+    path('createpod/', createpod, name='createpod'),
+    path('createpodepisode/', createpodepisode, name='createpodepisode'),
+    path('home/createpod_episode/', addEpisode, name='addEpisode'),
+    path('deletePodcast/', deletePodcast, name='deletePodcast'),
+    path('home/CRUD_daftarepisode.html/', createpodepisode, name='createpodepisode'),
 ]
