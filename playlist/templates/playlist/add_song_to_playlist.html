@@ -1,13 +1,18 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container">
+<body>
     <h1>Tambah Lagu ke Playlist</h1>
-    <form method="post">
+    <form method="post" action="{% url 'add_song_to_playlist' id %}">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-primary">Tambah</button>
-        <a href="{% url 'playlist_detail' playlist.id %}" class="btn btn-secondary">Batal</a>
+        <label for="lagu">Lagu:</label>
+        <select id="lagu" name="lagu" required>
+            {% for song in songs %}
+                <option value="{{ song.id }}">{{ song.judul }} - {{ song.artist }}</option>
+            {% endfor %}
+        </select><br>
+
+        <button type="submit">Submit</button>
     </form>
-</div>
+</body>
 {% endblock %}

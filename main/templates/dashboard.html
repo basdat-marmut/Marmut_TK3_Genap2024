@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
     <div class="container my-5">
         <h2 class="mb-4">Dashboard</h2>
         <div class="form-box">
@@ -13,55 +12,144 @@
                 <label class="form-label">Email:</label>
                 <p>{{ user.email }}</p>
             </div>
-            <div class="mb-3">
-                <label class="form-label">Kota Asal:</label>
-                <p>{{ user.city }}</p>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Gender:</label>
-                <p>{{ user.gender }}</p>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Tempat Lahir:</label>
-                <p>{{ user.birth_place }}</p>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Tanggal Lahir:</label>
-                <p>{{ user.birth_date }}</p>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Role:</label>
-                <p>{{ user.role }}</p>
-            </div>
 
-            <h4 class="mb-3">Daftar Playlist</h4>
-            {% if user.playlists %}
-                <table class="table table-dark">
-                    <thead>
-                        <tr>
-                            <th>Judul</th>
-                            <th>Jumlah Lagu</th>
-                            <th>Tanggal Dibuat</th>
-                            <th>Total Durasi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for playlist in user.playlists %}
+            {% if navbar.is_user %}
+                <div class="mb-3">
+                    <label class="form-label">Status Langganan:</label>
+                    <p>{{ user.subscription_status }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Kota Asal:</label>
+                    <p>{{ user.city }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Gender:</label>
+                    <p>{{ user.gender }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Tempat Lahir:</label>
+                    <p>{{ user.birth_place }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Tanggal Lahir:</label>
+                    <p>{{ user.birth_date }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Role:</label>
+                    <p>{{ user.role }}</p>
+                </div>
+            {% endif %}
+
+            {% if navbar.is_label %}
+                <div class="mb-3">
+                    <label class="form-label">Kontak:</label>
+                    <p>{{ user.contact }}</p>
+                </div>
+            {% endif %}
+
+            {% if navbar.is_user %}
+                <h4 class="mb-3">Daftar Playlist</h4>
+                {% if user.playlists %}
+                    <table class="table table-dark">
+                        <thead>
                             <tr>
-                                <td>{{ playlist.name }}</td>
-                                <td>{{ playlist.song_count }}</td>
-                                <td>{{ playlist.created_at }}</td>
-                                <td>{{ playlist.total_duration }}</td>
+                                <th>Judul</th>
+                                <th>Jumlah Lagu</th>
+                                <th>Tanggal Dibuat</th>
+                                <th>Total Durasi</th>
                             </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <p>Belum Memiliki Playlist</p>
+                        </thead>
+                        <tbody>
+                            {% for playlist in user.playlists %}
+                                <tr>
+                                    <td>{{ playlist.title }}</td>
+                                    <td>{{ playlist.song_count }}</td>
+                                    <td>{{ playlist.created_at }}</td>
+                                    <td>{{ playlist.total_duration }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>Belum Memiliki Playlist</p>
+                {% endif %}
+            {% endif %}
+
+            {% if navbar.is_artist or navbar.is_songwriter %}
+                <h4 class="mb-3">Daftar Lagu</h4>
+                {% if user.songs %}
+                    <table class="table table-dark">
+                        <thead>
+                            <tr>
+                                <th>Judul</th>
+                                <th>Tanggal Rilis</th>
+                                <th>Durasi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for song in user.songs %}
+                                <tr>
+                                    <td>{{ song.title }}</td>
+                                    <td>{{ song.release_date }}</td>
+                                    <td>{{ song.duration }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>Belum Memiliki Lagu</p>
+                {% endif %}
+            {% endif %}
+
+            {% if navbar.is_podcaster %}
+                <h4 class="mb-3">Daftar Podcast</h4>
+                {% if user.podcasts %}
+                    <table class="table table-dark">
+                        <thead>
+                            <tr>
+                                <th>Judul</th>
+                                <th>Tanggal Rilis</th>
+                                <th>Durasi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for podcast in user.podcasts %}
+                                <tr>
+                                    <td>{{ podcast.title }}</td>
+                                    <td>{{ podcast.release_date }}</td>
+                                    <td>{{ podcast.duration }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>Belum Memiliki Podcast</p>
+                {% endif %}
+            {% endif %}
+
+            {% if navbar.is_label %}
+                <h4 class="mb-3">Daftar Album</h4>
+                {% if user.albums %}
+                    <table class="table table-dark">
+                        <thead>
+                            <tr>
+                                <th>Judul</th>
+                                <th>Tanggal Rilis</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for album in user.albums %}
+                                <tr>
+                                    <td>{{ album.title }}</td>
+                                    <td>{{ album.release_date }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>Belum Memproduksi Album</p>
+                {% endif %}
             {% endif %}
         </div>
     </div>
-
-
 {% endblock %}
-

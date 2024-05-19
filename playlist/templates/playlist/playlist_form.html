@@ -1,13 +1,26 @@
 {% extends 'base.html' %}
-
 {% block content %}
-<div class="container">
-    <h1>{% if form.instance.pk %}Ubah{% else %}Tambah{% endif %} Playlist</h1>
-    <form method="post">
+<!-- templates/tambah_playlist.html -->
+
+
+<div class="container mt-4">
+    {% if ubah %}
+    <h1>Ubah Playlist</h1>
+    <form method="post" action="{% url 'playlist_update' id  %}">
+    {% else %}
+    <h1>Tambah Playlist</h1>
+    <form method="post" action="{% url 'playlist_create' %}">
+    {% endif %}
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-primary">Simpan</button>
-        <a href="{% url 'playlist_list' %}" class="btn btn-secondary">Batal</a>
+        
+        <label for="judul">Judul:</label>
+        <input type="text" id="judul" name="judul" required><br>
+
+        <label for="deskripsi">Deskripsi:</label>
+        <textarea id="deskripsi" name="deskripsi" required></textarea><br>
+
+        <button type="submit" class="btn btn-primary mt-3">Submit</button>
     </form>
 </div>
+
 {% endblock %}

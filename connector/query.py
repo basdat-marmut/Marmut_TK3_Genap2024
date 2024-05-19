@@ -25,19 +25,25 @@ def map_cursor(cursor):
     nt_result = namedtuple("Result", [col[0] for col in desc])
     return [dict(row) for row in cursor.fetchall()]
 
+
 def query(query_str: str):
     hasil = []
     with connection.cursor(cursor_factory=RealDictCursor) as cursor:
         cursor.execute("SET SEARCH_PATH TO PUBLIC")
         try:
             cursor.execute(query_str)
+
             if query_str.strip().upper().startswith("SELECT"):
+                # Kalau ga error, return hasil SELECT
                 hasil = map_cursor(cursor)
             else:
+                # Kalau ga error, return jumlah row yang termodifikasi oleh INSERT, UPDATE, DELETE
                 hasil = cursor.rowcount
                 connection.commit()
         except Exception as e:
+            # Ga tau error apa
             hasil = "error :\n" + str(e)
+
     return hasil
 
 def get_session_info(request):
@@ -47,3 +53,27 @@ def get_session_info(request):
         if user:
             return user[0]
     return None
+
+def get_navbar_info(request: HttpRequest):
+    session_info = get_session_info(request)
+
+    if session_info:
+        return {
+            'is_guest': False,
+            'is_user': not session_info['is_label'],
+            'is_artist': session_info['is_artist'],
+            'is_songwriter': session_info['is_songwriter']  ,
+            'is_podcaster': session_info['is_podcaster'],
+            'is_premium': session_info['is_premium'],
+            'is_label': session_info['is_label'],
+        }
+    else:
+        return {
+            'is_guest': True,
+            'is_user': False,
+            'is_artist': False,
+            'is_songwriter': False,
+            'is_podcaster': False,
+            'is_premium': False,
+            'is_label': False,
+        }

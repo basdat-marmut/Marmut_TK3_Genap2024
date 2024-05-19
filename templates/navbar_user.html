@@ -6,43 +6,45 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav me-auto mb-2 mb-md-0">
-                {% if user_type != 'guest' %}
+                {% if not navbar.is_guest %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'main:dashboard' %}">Dashboard</a>
                     </li>
-                    {% if user_type == 'user' or user_type == 'artist' or user_type == 'songwriter' or user_type == 'podcaster' %}
+                    {% if navbar.is_user or navbar.is_artist or navbar.is_songwriter or navbar.is_podcaster %}
                         <li class="nav-item">
                             <a class="nav-link" href="#">Chart</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Kelola Playlist</a>
+                            <a class="nav-link" href="#">Search Bar</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'langganan:langganan_paket' %}">Langganan Paket</a>
+                            <a class="nav-link" href="{% url 'playlist_list' %}">Kelola Playlist</a>
                         </li>
-                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Langganan Paket</a>
+                        </li>
                     {% endif %}
-                    {% if user_type == 'premium' %}
+                    {% if navbar.is_premium %}
                         <li class="nav-item">
                             <a class="nav-link" href="#">Kelola Downloaded Songs</a>
                         </li>
                     {% endif %}
-                    {% if user_type == 'podcaster' %}
+                    {% if navbar.is_podcaster %}
                         <li class="nav-item">
                             <a class="nav-link" href="#">Kelola Podcast</a>
                         </li>
                     {% endif %}
-                    {% if user_type == 'artist' or user_type == 'songwriter' %}
+                    {% if navbar.is_artist or navbar.is_songwriter %}
                         <li class="nav-item">
                             <a class="nav-link" href="#">Kelola Album & Songs</a>
                         </li>
                     {% endif %}
-                    {% if user_type == 'label' %}
+                    {% if navbar.is_label %}
                         <li class="nav-item">
                             <a class="nav-link" href="#">Kelola Album</a>
                         </li>
                     {% endif %}
-                    {% if user_type == 'artist' or user_type == 'songwriter' or user_type == 'label' %}
+                    {% if navbar.is_artist or navbar.is_songwriter or navbar.is_label %}
                         <li class="nav-item">
                             <a class="nav-link" href="#">Cek Royalti</a>
                         </li>
@@ -60,7 +62,8 @@
                 <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="query">
                 <button class="btn btn-outline-success" type="submit">Search</button>
             </form>
-            {% if user_type == 'guest' %}
+  
+            {% if navbar.is_guest %}
                 <form class="d-flex">
                     <button class="btn btn-pink me-2" type="button" onclick="location.href='{% url 'main:login' %}'">Login</button>
                     <button class="btn btn-cyan" type="button" onclick="location.href='{% url 'main:register' %}'">Register</button>
