@@ -8,8 +8,10 @@ from django.http import HttpResponse, HttpResponseNotFound
 from django.shortcuts import render, redirect
 from django.http import HttpResponseNotFound
 from connector.query import get_session_info, query, get_navbar_info  # Assuming these are custom utility functions
+#csrf_exempt
+from django.views.decorators.csrf import csrf_exempt
 
-
+@csrf_exempt
 def playlist_list(request):
     user = get_session_info(request)
     email = user['email']
@@ -36,7 +38,11 @@ def playlist_list(request):
     }
     return render(request, 'playlist/playlist_list.html', context)
 
+@csrf_exempt
 def playlist_create(request):
+    user = get_session_info(request)
+    if not user:
+        return redirect('main:login')
     if request.method == 'POST':
         user = get_session_info(request)
         email = user['email']
@@ -68,7 +74,11 @@ def playlist_create(request):
     context = {'ubah': False, 'navbar': get_navbar_info(request)}
     return render(request, 'playlist/playlist_form.html', context)
 
+@csrf_exempt
 def playlist_detail(request, playlist_id):
+    user = get_session_info(request)
+    if not user:
+        return redirect('main:login')
     id_user_playlist = playlist_id
     query_string = f"""
         SELECT *
@@ -120,9 +130,11 @@ def playlist_detail(request, playlist_id):
     }
     return render(request, 'playlist/playlist_detail.html', context)
 
+@csrf_exempt
 def remove_song_from_playlist(request, playlist_id, song_id):
     user = get_session_info(request)
-    
+    if not user:
+        return redirect('main:login')
     query_string = f"""
         DELETE FROM PLAYLIST_SONG
         WHERE id_playlist = 
@@ -137,7 +149,11 @@ def remove_song_from_playlist(request, playlist_id, song_id):
         return HttpResponseNotFound('Failed to remove song from playlist')
     
 
+@csrf_exempt
 def add_song_to_playlist(request, playlist_id):
+    user = get_session_info(request)
+    if not user:
+        return redirect('main:login')
     if request.method == 'POST':
         user = get_session_info(request)
         email = user['email']
@@ -181,6 +197,9 @@ def add_song_to_playlist(request, playlist_id):
     return render(request, 'playlist/add_song_to_playlist.html', context)
 
 def playlist_update(request, playlist_id):
+    user = get_session_info(request)
+    if not user:
+        return redirect('main:login')
     if request.method == 'POST':
         user = get_session_info(request)
         email = user['email']
@@ -201,7 +220,11 @@ def playlist_update(request, playlist_id):
     context = {'ubah': True, 'id' : playlist_id  , 'navbar': get_navbar_info(request)}
     return render(request, 'playlist/playlist_form.html', context)
 
+@csrf_exempt
 def playlist_delete(request, playlist_id):
+    user = get_session_info(request)
+    if not user:
+        return redirect('main:login')
     user_playlist_id = playlist_id
     playlist_id = query(f"""
         SELECT id_playlist FROM USER_PLAYLIST WHERE id_user_playlist = '{user_playlist_id}';

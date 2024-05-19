@@ -24,11 +24,11 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 
 
-
+@csrf_exempt
 def show_main(request):
     return redirect('main:login_and_register')
 
-
+@csrf_exempt
 def register_user(request):
     if request.method == 'POST':
         email = request.POST.get('email')
@@ -105,7 +105,7 @@ def register_user(request):
         'navbar' : get_navbar_info(request)
     }
     return render(request, 'register_user.html', context)
-
+@csrf_exempt
 def register_label(request):
     if request.method == 'POST':
         email = request.POST.get('email')
@@ -147,20 +147,20 @@ def register_label(request):
         'navbar' : get_navbar_info(request)
     }
     return render(request, 'register_label.html', context)
-
+@csrf_exempt
 def register(request):
     # Simply render the choice page without any logic for POST methods
     context = {
         'navbar' : get_navbar_info(request)
     }
     return render(request, 'register.html', context)
-
+@csrf_exempt
 def login_and_register(request):
     context = {
         'navbar' : get_navbar_info(request)
     }
     return render(request, 'login_and_register.html', context)
-
+@csrf_exempt
 def login_user(request):
     if request.method == 'POST':
         email = request.POST.get('email')
@@ -189,7 +189,7 @@ def login_user(request):
         'navbar' : get_navbar_info(request)
     }
     return render(request, 'login.html', context)
-
+@csrf_exempt
 def logout_user(request):
     session_id = request.COOKIES.get('session_id')
     if session_id:
@@ -200,9 +200,11 @@ def logout_user(request):
     response.delete_cookie('session_id')  # Delete session_id cookie
     return response
 
-
+@csrf_exempt
 def play_song(request, id):
     user = get_session_info(request)
+    if not user:
+        return redirect('main:login')
     id_konten = id
     query_string = f"""
     SELECT * FROM 
@@ -259,9 +261,11 @@ def play_song(request, id):
         'navbar' : get_navbar_info(request),
     }
     return render(request, 'play_song.html', context)
-
+@csrf_exempt
 def download_song(request, id):
     user = get_session_info(request)
+    if not user:
+        return redirect('main:login')
     email = user['email']
     id_konten = id
     query_string = f"""
@@ -272,7 +276,7 @@ def download_song(request, id):
         return HttpResponseNotFound("Download Failed")
     else:
         return HttpResponse("Song downloaded successfully!")
-
+@csrf_exempt
 def add_song_to_playlist(request):
     id_song = request.POST.get('id_song')
     id_playlist = request.POST.get('id_playlist')
@@ -286,9 +290,11 @@ def add_song_to_playlist(request):
         return HttpResponseNotFound("Failed to add song to playlist")
     else:
         return redirect('main:play_user_playlist', id=id_playlist)
-
+@csrf_exempt
 def user_play_song(request, id):
     user = get_session_info(request)
+    if not user:
+        return redirect('main:login')
     id_konten = id
     waktu = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     query_string = f"""
@@ -301,8 +307,11 @@ def user_play_song(request, id):
     else:
         return HttpResponse("Song played successfully!")
 
-
+@csrf_exempt
 def play_user_playlist(request, id):
+    user = get_session_info(request)
+    if not user:
+        return redirect('main:login')
     id_user_playlist = id
     query_string = f"""
         SELECT *
@@ -354,10 +363,13 @@ def play_user_playlist(request, id):
     
     return render(request, 'play_user_playlist.html', context)
 
+@csrf_exempt
 def shuffle_playlist(request, id):
     id_user_playlist = id
 
     user = get_session_info(request)
+    if not user:
+        return redirect('main:login')
     player = user['email']
     query_string = f"""
         
@@ -499,10 +511,13 @@ def yearly(request):
 
 def podetail(request):
     return render(request, "podcastdetail.html")
+
+@csrf_exempt
 def home(request):
     #redirect to login and register
     return redirect('main:login_and_register')
 
+@csrf_exempt
 def dashboard(request):
     # Get user from session
     ses_info = get_session_info(request)
