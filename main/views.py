@@ -38,16 +38,11 @@ def register_user(request):
         birth_place = request.POST.get('birthplace')
         birth_date = request.POST.get('birthdate')
         city = request.POST.get('city')
-        is_artist = 'True' in request.POST.get('is_artist')
-        is_songwriter = 'True' in request.POST.get('is_songwriter')
-        is_podcaster = 'True' in request.POST.get('is_podcaster')
+        is_artist = 'True' == request.POST.get('is_artist')
+        is_songwriter = 'True' == request.POST.get('is_songwriter')
+        is_podcaster = 'True' == request.POST.get('is_podcaster')
         
         #CEK APAKAH EMAIL SUDAH TERDAFTAR
-        email_exists = query(f"SELECT * FROM AKUN WHERE email = '{email}' UNION SELECT * FROM LABEL WHERE email = '{email}'")
-        if len(email_exists)!=0:
-            messages.error(request, 'Email already registered!')
-            return redirect('main:register_label')
-        
         is_verified = is_artist or is_songwriter or is_podcaster 
         pemilik_hak_cipta_id = str(uuid.uuid4())
 
@@ -55,10 +50,6 @@ def register_user(request):
                 INSERT INTO AKUN (email, password, nama, gender, tempat_lahir, tanggal_lahir, is_verified, kota_asal)
                 VALUES ('{email}', '{password}', '{name}', {gender}, '{birth_place}', '{birth_date}', {is_verified}, '{city}');
             """
-
-        query_string += f"""
-            INSERT INTO NONPREMIUM (email) VALUES ('{email}');
-        """
         
         if is_podcaster:
             query_string += f"""
@@ -93,7 +84,7 @@ def register_user(request):
             """
 
         res = query(query_string)
-
+        print("cok", res)
         
         if "error" in str(res):
             messages.error(request, 'An error occurred while registering your account. Please try again later.')
@@ -105,6 +96,7 @@ def register_user(request):
         'navbar' : get_navbar_info(request)
     }
     return render(request, 'register_user.html', context)
+
 @csrf_exempt
 def register_label(request):
     if request.method == 'POST':
@@ -116,10 +108,6 @@ def register_label(request):
         pemilik_hak_cipta_id = str(uuid.uuid4())
         
         #CEK APAKAH EMAIL SUDAH TERDAFTAR
-        email_exists = query(f"SELECT * FROM AKUN WHERE email = '{email}' UNION SELECT * FROM LABEL WHERE email = '{email}'")
-        if len(email_exists)!=0:
-            messages.error(request, 'Email already registered!')
-            return redirect('main:register_label')
         
 
         # Insert pemilik hak cipta
@@ -138,7 +126,10 @@ def register_label(request):
         res = query(query_string)
 
         if "error" in str(res):
-            messages.error(request, 'An error occurred while registering your account. Please try again later.')
+            if("Email sudah terdaftar" in str(res)):
+                messages.error(request, 'Email is already registered!')
+            else:
+                messages.error(request, 'An error occurred while registering your account. Please try again later.')
             print(res)
         else:
             messages.success(request, 'Registration successful!')
