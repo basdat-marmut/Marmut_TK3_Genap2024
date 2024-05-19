@@ -38,19 +38,10 @@ def write_to_txt(file_paths, output_file="codeToPrompt.txt"):
 
 # List of file paths including empty ones and directories
 file_paths = [
-    r"manage.py",
-    r"Dockerfile",
-    r".gitignore",
-    r".dockerignore",
-    r"Procfile",
-    r"marmut\urls.py",
-    r"marmut\wsgi.py",
-    r"marmut\settings.py",
-    r"connector\query.py",
-    r"",
-    r"",
-    r"",
-    r"",
+    r"langganan",
+    r"marmut",
+    r"connector",
+    r"main",
     r"",
     r"",
     r"",

@@ -156,30 +156,26 @@ def login_user(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
-        user = query(f"SELECT email FROM AKUN WHERE email = '{email}' AND password = '{password}' UNION SELECT email FROM LABEL WHERE email = '{email}' AND password = '{password}'")
-        print(user)
+        user = query(f"SELECT email FROM AKUN WHERE email = '{email}' AND password = '{password}'")
+        
         if len(user) == 0:
             messages.error(request, 'Invalid email or password!')
         else:
-            is_artist = len(query(f"SELECT * FROM ARTIST WHERE email_akun = '{email}'")) != 0
-            is_songwriter = len(query(f"SELECT * FROM SONGWRITER WHERE email_akun = '{email}'")) != 0
-            is_podcaster = len(query(f"SELECT * FROM PODCASTER WHERE email = '{email}'")) != 0
-            is_premium = len(query(f"SELECT * FROM PREMIUM WHERE email = '{email}'")) != 0
-            is_label = len(query(f"SELECT * FROM LABEL WHERE email = '{email}'")) != 0
-
-            session_id = str(uuid.uuid4())
-            temp = query(f"""INSERT INTO SESSIONS (session_id, email, is_label, is_premium, is_artist, is_songwriter, is_podcaster) 
-                  VALUES ('{session_id}', '{email}' , {is_label}, {is_premium}, {is_artist}, {is_songwriter}, {is_podcaster})
-                """)
+            # Panggil stored procedure untuk memeriksa dan mengubah status langganan
+            query("CALL periksa_dan_ubah_status_langganan()")
             
-
+            # Lanjutkan proses login
+            session_id = str(uuid.uuid4())
+            query(f"INSERT INTO SESSIONS (session_id, email) VALUES ('{session_id}', '{email}')")
+            
             response = redirect('main:dashboard')
             response.set_cookie('session_id', session_id)
             return response
     context = {
-        'navbar' : get_navbar_info(request)
+        'navbar': get_navbar_info(request)
     }
     return render(request, 'login.html', context)
+
 @csrf_exempt
 def logout_user(request):
     session_id = request.COOKIES.get('session_id')
