@@ -5,7 +5,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('main.urls')),
     path('playlist/', include('playlist.urls')),
-    path('langganan/', include('langganan.urls', namespace='langganan')),
+    path('langganan/', include(('langganan.urls', 'langganan'), namespace='langganan')),
     path('song/', include('song.urls')),
-    path('royalty_management/', include('royalty_management.urls'), namespace='royalty_management'),
+    path('royalty_management/', include(('royalty_management.urls', 'royalty_management'), namespace='royalty_management')),
 ]
