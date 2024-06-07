@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Downloaded Songs</title>
+</head>
+<body>
+    <h1>Downloaded Songs</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Song</th>
+                <th>Timestamp</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for downloaded_song in downloaded_songs %}
+            <tr>
+                <td>{{ downloaded_song.user.email }}</td>
+                <td>{{ downloaded_song.song.title }}</td>
+                <td>{{ downloaded_song.timestamp }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

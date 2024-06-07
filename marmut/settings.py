@@ -53,6 +53,28 @@ INSTALLED_APPS = [
 LOGIN_URL = 'main:login'  # Change to your actual login URL
 LOGIN_REDIRECT_URL = 'main:home'  # Change to the URL you want to redirect to after login
 LOGOUT_REDIRECT_URL = 'main:login'  # Change to your actual logout redirect URL
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django.db.backends': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+        },
+        'song': {  # Replace 'song' with the actual name of your app
+            'level': 'DEBUG',
+            'handlers': ['console'],
+            'propagate': True,
+        },
+    },
+}
+
 
 
 AUTHENTICATION_BACKENDS = [

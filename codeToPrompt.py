@@ -39,6 +39,7 @@ def write_to_txt(file_paths, output_file="codeToPrompt.txt"):
 # List of file paths including empty ones and directories
 file_paths = [
     r"song",
+    r"langganan\templates\langganan",
     r"langganan",
     r"templates",
     r"playlist",
@@ -46,7 +47,8 @@ file_paths = [
     r"connector\query.py",
     r"main\templates\dashboard.html",
     r"main\templates\search_results.html",
-    r"",
+    r"song\templates\song",
+    r"marmut",
 ]
 
 write_to_txt(file_paths)

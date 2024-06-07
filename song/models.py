@@ -27,3 +27,10 @@ class DownloadedSong(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     song = models.ForeignKey(Song, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user} downloaded {self.song} at {self.timestamp}"
+
+    class Meta:
+        db_table = 'downloaded_song'  # Ganti dengan nama tabel yang Anda inginkan
+

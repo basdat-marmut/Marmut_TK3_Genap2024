@@ -9,4 +9,5 @@ urlpatterns = [
     path('<uuid:song_id>/download/', views.download_song, name='download_song'),
     path('downloaded/', views.downloaded_songs, name='downloaded_songs'),
     path('search/', views.search, name='search'),
+    # path('view_downloaded_songs/', views.view_downloaded_songs, name='view_downloaded_songs'),  # Hapus rute ini jika tidak diperlukan
 ]
