@@ -43,9 +43,9 @@ file_paths = [
     r"templates",
     r"playlist",
     r"main",
-    r"",
-    r"",
-    r"",
+    r"connector\query.py",
+    r"main\templates\dashboard.html",
+    r"main\templates\search_results.html",
     r"",
 ]
 

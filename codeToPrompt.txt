@@ -559,6 +559,7 @@ templates\search_results.html:
             <tr>
                 <th>Tipe</th>
                 <th>Judul</th>
+                <th>Genre</th>
                 <th>Oleh</th>
                 <th>Actions</th>
             </tr>
@@ -568,6 +569,7 @@ templates\search_results.html:
                 <tr>
                     <td>{{ result.type }}</td>
                     <td>{{ result.title }}</td>
+                    <td>{{ result.genre }}</td>
                     <td>{{ result.by }}</td>
                     <td>
                         <a href="{{ result.url }}" class="btn btn-sm btn-info">Lihat</a>
@@ -1618,8 +1620,8 @@ def shuffle_playlist(request, id):
 
 def search(request):
     query_str = request.GET.get('query')
-    pass
-#     query = request.GET.get('query')
+    
+    results = []
     
     if query_str:
         songs = query(f"""
@@ -1633,18 +1635,6 @@ def search(request):
             GROUP BY k.id, k.judul, ak.nama
         """)
         
-        user_playlists = query(f"""
-            SELECT up.id_user_playlist, up.judul AS title, up.email_pembuat AS creator_email, ak.nama AS creator_name
-            FROM USER_PLAYLIST up
-            JOIN AKUN ak ON up.email_pembuat = ak.email
-            WHERE up.judul ILIKE '%{query_str}%'
-        """)
-#     if query:
-#         songs = Song.objects.filter(title__icontains=query)
-#         podcasts = podcast.objects.filter(title__icontains=query)
-#         user_playlists = UserPlaylist.objects.filter(title__icontains=query)
-        
-        results = []
         for song in songs:
             results.append({
                 'type': 'SONG',
@@ -1653,51 +1643,12 @@ def search(request):
                 'by': song['artist_name'],
                 'url': reverse('song_detail', args=[song['id']])
             })
-        for playlist in user_playlists:
-            results.append({
-                'type': 'USER PLAYLIST',
-                'title': playlist['title'],
-                'by': playlist['creator_name'],
-                'url': reverse('playlist_detail', args=[playlist['id_user_playlist'], playlist['creator_email']])
-            })
-    else:
-        results = []
-#         results = []
-#         for song in songs:
-#             results.append({
-#                 'type': 'SONG',
-#                 'title': song.title,
-#                 'by': song.artist,
-#                 'url': reverse('song_detail', args=[song.id])
-#             })
-#         for podcast in podcasts:
-#             results.append({
-#                 'type': 'PODCAST',
-#                 'title': podcast.title,
-#                 'by': podcast.podcaster,
-#                 'url': reverse('podcast_detail', args=[podcast.id])
-#             })
-#         for playlist in user_playlists:
-#             results.append({
-#                 'type': 'USER PLAYLIST',
-#                 'title': playlist.title,
-#                 'by': playlist.user.username,
-#                 'url': reverse('playlist_detail', args=[playlist.id])
-#             })
-#     else:
-#         results = []
     
     context = {
         'query': query_str,
         'results': results
     }
     return render(request, 'search_results.html', context)
-#     context = {
-#         'query': query,
-#         'results': results
-#     }
-#     return render(request, 'main/search_results.html', context)
-
 
 
 def createpod(request):
@@ -1733,6 +1684,8 @@ def podetail(request):
 def home(request):
     #redirect to login and register
     return redirect('main:login_and_register')
+
+
 
 @csrf_exempt
 def dashboard(request):
@@ -1817,6 +1770,285 @@ def dashboard(request):
 
 
 main\__init__.py:
+
+
+
+connector\query.py:
+from collections import namedtuple
+import psycopg2
+from psycopg2 import Error
+from psycopg2.extras import RealDictCursor
+from django.http import HttpRequest  # for the 'request' parameter
+
+
+try:
+    connection = psycopg2.connect(user="postgres.tutzylpjrcjropovgoly",
+                        password="eqRvUiBE4LZlukUp",
+                        host="aws-0-ap-southeast-1.pooler.supabase.com",
+                        port="5432",
+                        database="postgres")
+
+    # Create a cursor to perform database operations
+    connection.autocommit = True
+    cursor = connection.cursor()
+except (Exception, Error) as error:
+    print("Error while connecting to PostgreSQL", error)
+
+
+def map_cursor(cursor):
+    "Return all rows from a cursor as a namedtuple"
+    desc = cursor.description
+    nt_result = namedtuple("Result", [col[0] for col in desc])
+    return [dict(row) for row in cursor.fetchall()]
+
+
+def query(query_str: str):
+    hasil = []
+    with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+        cursor.execute("SET SEARCH_PATH TO PUBLIC")
+        try:
+            cursor.execute(query_str)
+
+            if query_str.strip().upper().startswith("SELECT"):
+                # Kalau ga error, return hasil SELECT
+                hasil = map_cursor(cursor)
+            else:
+                # Kalau ga error, return jumlah row yang termodifikasi oleh INSERT, UPDATE, DELETE
+                hasil = cursor.rowcount
+                connection.commit()
+        except Exception as e:
+            # Ga tau error apa
+            hasil = "error :\n" + str(e)
+
+    return hasil
+
+def get_session_info(request):
+    session_id = request.COOKIES.get('session_id')
+    if session_id:
+        user = query(f"SELECT * FROM SESSIONS WHERE session_id = '{session_id}'")
+        if user:
+            return user[0]
+    return None
+
+def get_navbar_info(request: HttpRequest):
+    session_info = get_session_info(request)
+
+    if session_info:
+        return {
+            'is_guest': False,
+            'is_user': not session_info['is_label'],
+            'is_artist': session_info['is_artist'],
+            'is_songwriter': session_info['is_songwriter']  ,
+            'is_podcaster': session_info['is_podcaster'],
+            'is_premium': session_info['is_premium'],
+            'is_label': session_info['is_label'],
+        }
+    else:
+        return {
+            'is_guest': True,
+            'is_user': False,
+            'is_artist': False,
+            'is_songwriter': False,
+            'is_podcaster': False,
+            'is_premium': False,
+            'is_label': False,
+        }
+
+
+main\templates\dashboard.html:
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container my-5">
+        <h2 class="mb-4">Dashboard</h2>
+        <div class="form-box">
+            <div class="mb-3">
+                <label class="form-label">Nama:</label>
+                <p>{{ user.name }}</p>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Email:</label>
+                <p>{{ user.email }}</p>
+            </div>
+
+            {% if navbar.is_user %}
+                <div class="mb-3">
+                    <label class="form-label">Status Langganan:</label>
+                    <p>{{ user.subscription_status }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Kota Asal:</label>
+                    <p>{{ user.city }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Gender:</label>
+                    <p>{{ user.gender }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Tempat Lahir:</label>
+                    <p>{{ user.birth_place }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Tanggal Lahir:</label>
+                    <p>{{ user.birth_date }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Role:</label>
+                    <p>{{ user.role }}</p>
+                </div>
+            {% endif %}
+
+            {% if navbar.is_label %}
+                <div class="mb-3">
+                    <label class="form-label">Kontak:</label>
+                    <p>{{ user.contact }}</p>
+                </div>
+            {% endif %}
+
+            {% if navbar.is_user %}
+                <h4 class="mb-3">Daftar Playlist</h4>
+                {% if user.playlists %}
+                    <table class="table table-dark">
+                        <thead>
+                            <tr>
+                                <th>Judul</th>
+                                <th>Jumlah Lagu</th>
+                                <th>Tanggal Dibuat</th>
+                                <th>Total Durasi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for playlist in user.playlists %}
+                                <tr>
+                                    <td>{{ playlist.title }}</td>
+                                    <td>{{ playlist.song_count }}</td>
+                                    <td>{{ playlist.created_at }}</td>
+                                    <td>{{ playlist.total_duration }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>Belum Memiliki Playlist</p>
+                {% endif %}
+            {% endif %}
+
+            {% if navbar.is_artist or navbar.is_songwriter %}
+                <h4 class="mb-3">Daftar Lagu</h4>
+                {% if user.songs %}
+                    <table class="table table-dark">
+                        <thead>
+                            <tr>
+                                <th>Judul</th>
+                                <th>Tanggal Rilis</th>
+                                <th>Durasi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for song in user.songs %}
+                                <tr>
+                                    <td>{{ song.title }}</td>
+                                    <td>{{ song.release_date }}</td>
+                                    <td>{{ song.duration }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>Belum Memiliki Lagu</p>
+                {% endif %}
+            {% endif %}
+
+            {% if navbar.is_podcaster %}
+                <h4 class="mb-3">Daftar Podcast</h4>
+                {% if user.podcasts %}
+                    <table class="table table-dark">
+                        <thead>
+                            <tr>
+                                <th>Judul</th>
+                                <th>Tanggal Rilis</th>
+                                <th>Durasi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for podcast in user.podcasts %}
+                                <tr>
+                                    <td>{{ podcast.title }}</td>
+                                    <td>{{ podcast.release_date }}</td>
+                                    <td>{{ podcast.duration }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>Belum Memiliki Podcast</p>
+                {% endif %}
+            {% endif %}
+
+            {% if navbar.is_label %}
+                <h4 class="mb-3">Daftar Album</h4>
+                {% if user.albums %}
+                    <table class="table table-dark">
+                        <thead>
+                            <tr>
+                                <th>Judul</th>
+                                <th>Tanggal Rilis</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for album in user.albums %}
+                                <tr>
+                                    <td>{{ album.title }}</td>
+                                    <td>{{ album.release_date }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>Belum Memproduksi Album</p>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+
+
+main\templates\search_results.html:
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Hasil Pencarian "{{ query }}"</h2>
+
+{% if results %}
+    <table class="table table-dark">
+        <thead>
+            <tr>
+                <th>Tipe</th>
+                <th>Judul</th>
+                <th>Genre</th>
+                <th>Oleh</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in results %}
+                <tr>
+                    <td>{{ result.type }}</td>
+                    <td>{{ result.title }}</td>
+                    <td>{{ result.genre }}</td>
+                    <td>{{ result.by }}</td>
+                    <td>
+                        <a href="{{ result.url }}" class="btn btn-sm btn-info">Lihat</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>Maaf, pencarian untuk "{{ query }}" tidak ditemukan</p>
+{% endif %}
+{% endblock %}
 
 
 

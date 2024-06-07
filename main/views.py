@@ -460,18 +460,18 @@ def home(request):
     #redirect to login and register
     return redirect('main:login_and_register')
 
+
 @csrf_exempt
 def dashboard(request):
-    # Get user from session
     ses_info = get_session_info(request)
     email = ses_info['email']
     if not email:
         return redirect('main:login')
-    
+
     user = query(f"SELECT * FROM AKUN WHERE email = '{email}'")[0]
     if ses_info['is_label']:
         user = query(f"SELECT * FROM LABEL WHERE email = '{email}'")[0]
-    
+
     roles = []
     if ses_info['is_label']:
         roles.append("Label")
@@ -495,20 +495,19 @@ def dashboard(request):
         podcasts = [{'title': podcast['judul'], 'release_date': podcast['tanggal_rilis'], 'durasi': podcast['durasi']} for podcast in podcasts]
     else:
         podcasts = []
-    
+
     if ses_info['is_artist']:
         songs_artist = query(f"SELECT judul, tanggal_rilis, durasi  FROM SONG JOIN KONTEN ON SONG.id_konten = KONTEN.id JOIN ARTIST ON ARTIST.id = SONG.id_artist WHERE ARTIST.email_akun = '{email}'")
-        print(songs_artist)
         songs_artist = [{'title': song['judul'], 'release_date': song['tanggal_rilis'], 'durasi': song['durasi']} for song in songs_artist]
     else:
         songs_artist = []
-    
+
     if ses_info['is_songwriter']:
         songs_songwriter = query(f"SELECT * FROM KONTEN WHERE KONTEN.id IN (SELECT id_song FROM SONGWRITER_WRITE_SONG WHERE SONGWRITER_WRITE_SONG.id_songwriter = (SELECT id FROM SONGWRITER WHERE email_akun = '{email}'))")
         songs_songwriter = [{'title': song['judul'], 'release_date': song['tanggal_rilis'], 'durasi': song['durasi']} for song in songs_songwriter]
     else:
         songs_songwriter = []
-    
+
     songs = songs_artist + songs_songwriter
 
     playlists = query(f"""
@@ -516,8 +515,14 @@ def dashboard(request):
         JOIN AKUN a ON up.email_pembuat = a.email
         WHERE up.email_pembuat = '{email}';
     """)
-    print(playlists)
     playlists = [{'title': playlist['judul'], 'created_at': playlist['tanggal_dibuat'], 'song_count': playlist['jumlah_lagu'], 'total_duration': playlist['total_durasi']} for playlist in playlists]
+
+    # Cek status langganan
+    is_premium = len(query(f"SELECT * FROM PREMIUM WHERE email = '{email}'")) > 0
+    if is_premium:
+        subscription_status = "Premium"
+    else:
+        subscription_status = "Non-Premium"
 
     user = {
         'name': user['nama'],
@@ -531,11 +536,12 @@ def dashboard(request):
         'songs': songs,
         'podcasts': podcasts,
         'albums': album_list,
+        'subscription_status': subscription_status,
     }
 
     context = {
         'user': user,
         'user_type': 'user',
-        'navbar' : get_navbar_info(request),
+        'navbar': get_navbar_info(request),
     }
     return render(request, 'dashboard.html', context)
