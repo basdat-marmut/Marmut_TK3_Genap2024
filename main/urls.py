@@ -12,7 +12,6 @@ from main.views import daily
 from main.views import weekly
 from main.views import monthly
 from main.views import yearly
-from main.views import podetail
 from main.views import download_song, add_song_to_playlist, user_play_song, shuffle_playlist
 
 app_name = 'main'
@@ -27,7 +26,6 @@ urlpatterns = [
     path('play-user-playlist/<str:id>/', play_user_playlist, name='play_user_playlist'),    
     path('createpod.html/', createpod, name='createpod'),
     path('createpod.html/createpod_episode.html/', createpodepisode, name='createpodepisode'),
-    path('podetail.html/', podetail, name='podetail'),
     path('seechart.html/', seechart, name='seechart'),
     path('seechart.html/daily.html', daily, name='daily'),
     path('seechart.html/weekly.html', weekly, name='weekly'),
