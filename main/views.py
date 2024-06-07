@@ -395,8 +395,8 @@ def shuffle_playlist(request, id):
 
 def search(request):
     query_str = request.GET.get('query')
-    pass
-#     query = request.GET.get('query')
+    
+    results = []
     
     if query_str:
         songs = query(f"""
@@ -410,18 +410,6 @@ def search(request):
             GROUP BY k.id, k.judul, ak.nama
         """)
         
-        user_playlists = query(f"""
-            SELECT up.id_user_playlist, up.judul AS title, up.email_pembuat AS creator_email, ak.nama AS creator_name
-            FROM USER_PLAYLIST up
-            JOIN AKUN ak ON up.email_pembuat = ak.email
-            WHERE up.judul ILIKE '%{query_str}%'
-        """)
-#     if query:
-#         songs = Song.objects.filter(title__icontains=query)
-#         podcasts = podcast.objects.filter(title__icontains=query)
-#         user_playlists = UserPlaylist.objects.filter(title__icontains=query)
-        
-        results = []
         for song in songs:
             results.append({
                 'type': 'SONG',
@@ -430,51 +418,12 @@ def search(request):
                 'by': song['artist_name'],
                 'url': reverse('song_detail', args=[song['id']])
             })
-        for playlist in user_playlists:
-            results.append({
-                'type': 'USER PLAYLIST',
-                'title': playlist['title'],
-                'by': playlist['creator_name'],
-                'url': reverse('playlist_detail', args=[playlist['id_user_playlist'], playlist['creator_email']])
-            })
-    else:
-        results = []
-#         results = []
-#         for song in songs:
-#             results.append({
-#                 'type': 'SONG',
-#                 'title': song.title,
-#                 'by': song.artist,
-#                 'url': reverse('song_detail', args=[song.id])
-#             })
-#         for podcast in podcasts:
-#             results.append({
-#                 'type': 'PODCAST',
-#                 'title': podcast.title,
-#                 'by': podcast.podcaster,
-#                 'url': reverse('podcast_detail', args=[podcast.id])
-#             })
-#         for playlist in user_playlists:
-#             results.append({
-#                 'type': 'USER PLAYLIST',
-#                 'title': playlist.title,
-#                 'by': playlist.user.username,
-#                 'url': reverse('playlist_detail', args=[playlist.id])
-#             })
-#     else:
-#         results = []
     
     context = {
         'query': query_str,
         'results': results
     }
     return render(request, 'search_results.html', context)
-#     context = {
-#         'query': query,
-#         'results': results
-#     }
-#     return render(request, 'main/search_results.html', context)
-
 
 
 def createpod(request):

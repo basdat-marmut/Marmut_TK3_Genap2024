@@ -21,12 +21,12 @@
                             <a class="nav-link" href="{% url 'playlist_list' %}">Kelola Playlist</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Langganan Paket</a>
+                            <a class="nav-link" href="{% url 'langganan:langganan_paket' %}">Langganan Paket</a>
                         </li>
                     {% endif %}
                     {% if navbar.is_premium %}
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Kelola Downloaded Songs</a>
+                            <a class="nav-link" href="{% url 'downloaded_songs' %}">Kelola Downloaded Songs</a>
                         </li>
                     {% endif %}
                     {% if navbar.is_podcaster %}

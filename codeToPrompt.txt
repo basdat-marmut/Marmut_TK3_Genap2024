@@ -1,5 +1,233 @@
 ini adalah kode sekarang:
 
+song\admin.py:
+from django.contrib import admin
+
+# Register your models here.
+
+
+
+song\apps.py:
+from django.apps import AppConfig
+
+
+class SongConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'song'
+
+
+
+song\models.py:
+from django.db import models
+from django.contrib.auth.models import User
+import uuid
+
+class Song(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    title = models.CharField(max_length=100)
+    genre = models.CharField(max_length=100)
+    artist = models.CharField(max_length=100)
+    songwriter = models.CharField(max_length=100)
+    duration = models.IntegerField()
+    release_date = models.DateField()
+    year = models.IntegerField()
+    total_play = models.IntegerField(default=0)
+    total_download = models.IntegerField(default=0)
+    album = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.title
+
+class AkunPlaySong(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    song = models.ForeignKey(Song, on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+class DownloadedSong(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    song = models.ForeignKey(Song, on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+
+
+song\tests.py:
+from django.test import TestCase
+
+# Create your tests here.
+
+
+
+song\urls.py:
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.song_list, name='song_list'),
+    path('<uuid:song_id>/', views.song_detail, name='song_detail'),
+    path('<uuid:song_id>/play/', views.play_song, name='play_song'),
+    path('<uuid:song_id>/add-to-playlist/', views.add_to_playlist, name='add_to_playlist'),
+    path('<uuid:song_id>/download/', views.download_song, name='download_song'),
+    path('downloaded/', views.downloaded_songs, name='downloaded_songs'),
+    path('search/', views.search, name='search'),
+]
+
+
+
+song\views.py:
+from pyexpat.errors import messages
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
+from .models import Song, AkunPlaySong, DownloadedSong
+from playlist.models import Playlist, UserPlaylist
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.utils import timezone
+from connector.query import query, get_session_info
+
+
+def song_list(request):
+    songs = Song.objects.all()
+    return render(request, 'song/song_list.html', {'songs': songs})
+
+def song_detail(request, song_id):
+    song = get_object_or_404(Song, id=song_id)
+    is_premium = request.user.is_authenticated and request.user.is_premium
+    
+    if request.method == 'POST':
+        if 'play' in request.POST:
+            progress = int(request.POST.get('progress', 0))
+            if progress > 70:
+                song.total_play += 1
+                song.save()
+                AkunPlaySong.objects.create(user=request.user, song=song, timestamp=timezone.now())
+        
+        elif 'add_to_playlist' in request.POST:
+            playlist_id = request.POST.get('playlist')
+            playlist = get_object_or_404(Playlist, id=playlist_id, user=request.user)
+            if UserPlaylist.objects.filter(playlist=playlist, song=song).exists():
+                message = f"Lagu dengan judul '{song.title}' sudah ditambahkan di '{playlist.title}'!"
+            else:
+                UserPlaylist.objects.create(playlist=playlist, song=song)
+                message = f"Berhasil menambahkan Lagu dengan judul '{song.title}' ke '{playlist.title}'!"
+            return render(request, 'song/song_detail.html', {'song': song, 'is_premium': is_premium, 'message': message})
+        
+        elif 'download' in request.POST:
+            if is_premium:
+                if DownloadedSong.objects.filter(user=request.user, song=song).exists():
+                    message = f"Lagu dengan judul '{song.title}' sudah pernah di unduh!"
+                else:
+                    DownloadedSong.objects.create(user=request.user, song=song)
+                    song.total_download += 1
+                    song.save()
+                    message = f"Berhasil mengunduh Lagu dengan judul '{song.title}'!"
+                return render(request, 'song/song_detail.html', {'song': song, 'is_premium': is_premium, 'message': message})
+    
+    playlists = Playlist.objects.filter(user=request.user)
+    return render(request, 'song/song_detail.html', {'song': song, 'is_premium': is_premium, 'playlists': playlists})
+
+@login_required
+def play_song(request, song_id):
+    song = get_object_or_404(Song, id=song_id)
+    progress = int(request.POST.get('progress', 0))
+    if progress > 70:
+        song.total_play += 1
+        song.save()
+        AkunPlaySong.objects.create(user=request.user, song=song)
+    return JsonResponse({'status': 'success'})
+
+@login_required
+def add_to_playlist(request, song_id):
+    song = get_object_or_404(Song, id=song_id)
+    if request.method == 'POST':
+        playlist_id = request.POST.get('playlist')
+        playlist = get_object_or_404(Playlist, id=playlist_id, user=request.user)
+        UserPlaylist.objects.create(playlist=playlist, song=song)
+        return render(request, 'song/message.html', {
+            'message': f"Berhasil menambahkan Lagu dengan judul '{song.title}' ke '{playlist.name}'!",
+            'playlist_url': reverse('playlist_detail', args=[playlist.id]),
+            'song_id': song.id,
+        })
+    playlists = Playlist.objects.filter(user=request.user)
+    return render(request, 'song/add_to_playlist.html', {'song': song, 'playlists': playlists})
+
+@login_required
+def download_song(request, song_id):
+    song = get_object_or_404(Song, id=song_id)
+    if request.user.is_premium:
+        song.total_download += 1
+        song.save()
+        DownloadedSong.objects.create(user=request.user, song=song)
+        return render(request, 'song/message.html', {
+            'message': f"Berhasil mengunduh Lagu dengan judul '{song.title}'!",
+            'playlist_url': reverse('downloaded_songs'),
+            'song_id': song.id,
+        })
+    return redirect('song_detail', song_id=song.id)
+
+def downloaded_songs(request):
+    ses_info = get_session_info(request)
+    if not ses_info:
+        return redirect('main:login')
+    
+    user_email = ses_info['email']
+    downloaded_songs = DownloadedSong.objects.filter(user__email=user_email).order_by('-timestamp')
+    
+    if request.method == 'POST':
+        song_id = request.POST.get('song_id')
+        song = get_object_or_404(Song, id=song_id)
+        downloaded_song = get_object_or_404(DownloadedSong, user__email=user_email, song_id=song_id)
+        downloaded_song.delete()
+        song.total_download -= 1
+        song.save()
+        messages.success(request, f"Berhasil menghapus Lagu dengan judul '{song.title}' dari daftar unduhan!")
+        return redirect('downloaded_songs')
+    
+    return render(request, 'song/downloaded_songs.html', {'downloaded_songs': downloaded_songs})
+
+
+def search(request):
+    query = request.GET.get('query')
+    
+    results = []
+    
+    if query:
+        songs = Song.objects.filter(title__icontains=query)
+        podcasts = podcast.objects.filter(title__icontains=query)
+        
+        for song in songs:
+            results.append({
+                'type': 'SONG',
+                'title': song.title,
+                'by': song.artist,
+                'url': reverse('song_detail', args=[song.id])
+            })
+        for podcast in podcasts:
+            results.append({
+                'type': 'PODCAST',
+                'title': podcast.title,
+                'by': podcast.podcaster,
+                'url': reverse('podcast_detail', args=[podcast.id])
+            })
+    
+    context = {
+        'query': query,
+        'results': results
+    }
+    return render(request, 'main/search_results.html', context)
+
+
+
+
+
+
+
+
+
+
+song\__init__.py:
+
+
+
 langganan\admin.py:
 from django.contrib import admin
 
@@ -54,6 +282,7 @@ urlpatterns = [
     path('riwayat_transaksi/', views.riwayat_transaksi, name='riwayat_transaksi'),
     path('pembayaran_paket/<str:jenis>/', views.pembayaran_paket, name='pembayaran_paket'),
 ]
+
 
 
 langganan\views.py:
@@ -137,301 +366,647 @@ langganan\__init__.py:
 
 
 
-marmut\asgi.py:
-"""
-ASGI config for marmut project.
+templates\base.html:
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marmut</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body, .form-label, .btn {
+            background-color: #121212; 
+            color: #fff; 
+        }
+        h2 {
+            color: #fff; 
+        }
+        .form-box {
+            background-color: #333;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+        }
+        .btn-pink {
+            background-color: #ff007f; 
+            border-color: #ff007f;
+        }
+        .btn-pink:hover {
+            background-color: #e60074;
+            border-color: #cc0066;
+        }
+        .btn-cyan {
+            background-color: #00ffff; 
+            border-color: #00ffff;
+        }
+        .btn-cyan:hover {
+            background-color: #00e5e5;
+            border-color: #00cccc;
+        }
+        .form-control {
+            background-color: #222;
+            border: 1px solid #555;
+            color: #fff;
+        }
+        .form-control:focus {
+            box-shadow: 0 0 0 0.25rem rgba(0, 255, 255, 0.25);
+            border-color: #00ffff;
+        }
+    </style>
+</head>
+<body>
+    {% include 'navbar_user.html' %}
 
-It exposes the ASGI callable as a module-level variable named ``application``.
+    <div class="container mt-4">
+        {% block content %}{% endblock %}
+    </div>
 
-For more information on this file, see
-https://docs.djangoproject.com/en/4.2/howto/deployment/asgi/
-"""
-
-import os
-
-from django.core.asgi import get_asgi_application
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "marmut.settings")
-
-application = get_asgi_application()
-
-
-
-marmut\settings.py:
-"""
-Django settings for marmut project.
-
-Generated by 'django-admin startproject' using Django 4.2.4.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/4.2/topics/settings/
-
-For the full list of settings and their values, see
-https://docs.djangoproject.com/en/4.2/ref/settings/
-"""
-
-from pathlib import Path
-import environ # Tambahkan kode berikut
-import os # Tambahkan kode berikut
-from django.core.management.utils import get_random_secret_key
-from pathlib import Path
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-env = environ.Env() # Tambahkan kode berikut
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-5dgque*$6nl$6wj!p#7%6b=ot92+jm@f%!(*9-2tz!3=&n&+*w"
-
-PRODUCTION = env.bool('PRODUCTION', False)
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ["*"]
-
-
-# Application definition
-
-INSTALLED_APPS = [
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
-    "main",
-    "playlist",
-    "langganan",
-    "song",
-    "royalty_management",
-]
-
-LOGIN_URL = 'main:login'  # Change to your actual login URL
-LOGIN_REDIRECT_URL = 'main:home'  # Change to the URL you want to redirect to after login
-LOGOUT_REDIRECT_URL = 'main:login'  # Change to your actual logout redirect URL
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
 
 
-AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-]
-
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-SESSION_COOKIE_AGE = 1209600  # Two weeks
-SESSION_SAVE_EVERY_REQUEST = True
-
-
-
-MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
-
-ROOT_URLCONF = "marmut.urls"
-
-TEMPLATES = [
-    {
-        "BACKEND": "django.template.backends.django.DjangoTemplates",
-        'DIRS': [BASE_DIR / 'templates'],
-        "APP_DIRS": True,
-        "OPTIONS": {
-            "context_processors": [
-                "django.template.context_processors.debug",
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
-            ],
-        },
-    },
-]
-
-WSGI_APPLICATION = "marmut.wsgi.application"
-
-
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
-
-if PRODUCTION:
-    DATABASES = {
-        'default': env.db('DATABASE_URL')
-    }
-    DATABASES["default"]["ATOMIC_REQUESTS"] = True
+templates\navbar_guest.html:
+<nav class="navbar navbar-expand-md navbar-dark bg-dark-custom">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Marmut</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="#">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Pricing</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'playlist_list' %}">Kelola Playlist</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'langganan_paket' %}">Langganan Paket</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'song_list' %}">Daftar Lagu</a>
+                </li>
+                <li>
+                    <form class="d-flex" action="{% url 'main:search' %}" method="get">
+                        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="query">
+                        <button class="btn btn-outline-success" type="submit">Search</button>
+                    </form>
+                </li>                
+            </ul>
+            <form class="d-flex">
+                <a href="{% url 'main:login' %}" class="btn btn-pink me-2" type="submit">Login</a>
+                <a href="{% url 'main:register' %}" class="btn btn-cyan" type="submit">Register</a>
+            </form>
+        </div>
+    </div>
+</nav>
 
 
-# Password validation
-# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
+templates\navbar_user.html:
+<nav class="navbar navbar-expand-md navbar-dark bg-dark-custom">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'main:home' %}">Mahmud</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                {% if not navbar.is_guest %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'main:dashboard' %}">Dashboard</a>
+                    </li>
+                    {% if navbar.is_user or navbar.is_artist or navbar.is_songwriter or navbar.is_podcaster %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Chart</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Search Bar</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'playlist_list' %}">Kelola Playlist</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'langganan:langganan_paket' %}">Langganan Paket</a>
+                        </li>
+                    {% endif %}
+                    {% if navbar.is_premium %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'downloaded_songs' %}">Kelola Downloaded Songs</a>
+                        </li>
+                    {% endif %}
+                    {% if navbar.is_podcaster %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Kelola Podcast</a>
+                        </li>
+                    {% endif %}
+                    {% if navbar.is_artist or navbar.is_songwriter %}
+                        <!--Test Deployan up to date atau nggak-->
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'royalty_management:view_album' %}">Kelola Album & Songs</a>
+                        </li>
+                    {% endif %}
+                    {% if navbar.is_label %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'royalty_management:view_album_label' %}">Kelola Album</a>
+                        </li>
+                    {% endif %}
+                    {% if navbar.is_artist or navbar.is_songwriter or navbar.is_label %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'royalty_management:view_royalty' %}">Cek Royalti</a>
+                        </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'main:logout' %}">Logout</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'main:home' %}">Home</a>
+                    </li>
+                {% endif %}
+            </ul>
+            <form class="d-flex" action="{% url 'main:search' %}" method="get">
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="query">
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
+  
+            {% if navbar.is_guest %}
+                <form class="d-flex">
+                    <button class="btn btn-pink me-2" type="button" onclick="location.href='{% url 'main:login' %}'">Login</button>
+                    <button class="btn btn-cyan" type="button" onclick="location.href='{% url 'main:register' %}'">Register</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+</nav>
 
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",},
-    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",},
-    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
-]
 
 
-# Internationalization
-# https://docs.djangoproject.com/en/4.2/topics/i18n/
+templates\search_results.html:
+{% extends 'base.html' %}
 
-LANGUAGE_CODE = "en-us"
+{% block content %}
+<h2>Hasil Pencarian "{{ query }}"</h2>
 
-TIME_ZONE = "UTC"
+{% if results %}
+    <table class="table table-dark">
+        <thead>
+            <tr>
+                <th>Tipe</th>
+                <th>Judul</th>
+                <th>Oleh</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in results %}
+                <tr>
+                    <td>{{ result.type }}</td>
+                    <td>{{ result.title }}</td>
+                    <td>{{ result.by }}</td>
+                    <td>
+                        <a href="{{ result.url }}" class="btn btn-sm btn-info">Lihat</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>Maaf, pencarian untuk "{{ query }}" tidak ditemukan</p>
+{% endif %}
+{% endblock %}
 
-USE_I18N = True
-
-USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
-
-STATIC_URL = "static/"
-
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-
-
-marmut\urls.py:
+playlist\admin.py:
 from django.contrib import admin
-from django.urls import path, include
+
+# Register your models here.
+
+
+
+playlist\apps.py:
+from django.apps import AppConfig
+
+
+class PlaylistConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'playlist'
+
+
+
+playlist\forms.py:
+from django import forms
+from .models import Playlist, Song, UserPlaylist
+
+class PlaylistForm(forms.ModelForm):
+    class Meta:
+        model = Playlist
+        fields = ['name', 'description']
+
+class UserPlaylistForm(forms.ModelForm):
+    song = forms.ModelChoiceField(queryset=Song.objects.all(), empty_label=None)
+
+    class Meta:
+        model = UserPlaylist
+        fields = ['song']
+
+
+playlist\models.py:
+from django.db import models
+from django.contrib.auth.models import User
+import uuid
+
+class Playlist(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+class Song(models.Model):
+    title = models.CharField(max_length=100)
+    artist = models.CharField(max_length=100)
+    duration = models.IntegerField()
+
+    def __str__(self):
+        return self.title
+
+class UserPlaylist(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE)
+    song = models.ForeignKey(Song, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+
+playlist\tests.py:
+from django.test import TestCase
+
+# Create your tests here.
+
+
+
+playlist\urls.py:
+from django.urls import path
+from . import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include('main.urls')),
-    path('playlist/', include('playlist.urls')),
-    path('langganan/', include('langganan.urls', namespace='langganan')),
-    path('song/', include('song.urls')),
-    path('royalty_management/', include('royalty_management.urls')),
+    path('', views.playlist_list, name='playlist_list'),
+    path('create/', views.playlist_create, name='playlist_create'),
+    path('<uuid:playlist_id>/', views.playlist_detail, name='playlist_detail'),
+    path('<uuid:playlist_id>/update/', views.playlist_update, name='playlist_update'),
+    path('<uuid:playlist_id>/delete/', views.playlist_delete, name='playlist_delete'),
+    path('<uuid:playlist_id>/add-song/', views.add_song_to_playlist, name='add_song_to_playlist'),
+    path('<uuid:playlist_id>/remove-song/<uuid:song_id>/', views.remove_song_from_playlist, name='remove_song_from_playlist'),
 ]
 
 
 
-marmut\wsgi.py:
-"""
-WSGI config for marmut project.
+playlist\views.py:
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
+import uuid
+from datetime import datetime
+from connector.query import query, get_session_info
+#httpresponse
+from django.http import HttpResponse, HttpResponseNotFound
+from django.shortcuts import render, redirect
+from django.http import HttpResponseNotFound
+from connector.query import get_session_info, query, get_navbar_info  # Assuming these are custom utility functions
+#csrf_exempt
+from django.views.decorators.csrf import csrf_exempt
 
-It exposes the WSGI callable as a module-level variable named ``application``.
+@csrf_exempt
+def playlist_list(request):
+    user = get_session_info(request)
+    email = user['email']
+    if not user:
+        return redirect('main:login')
+    playlists = query(f"""
+        SELECT * FROM USER_PLAYLIST up
+        JOIN AKUN a ON up.email_pembuat = a.email
+        WHERE up.email_pembuat = '{email}';
+    """)
+    res_playlist = []
+    for playlist in playlists:
+        res_playlist.append({
+            'name'  : playlist['judul'],
+            'description' : playlist['deskripsi'],
+            'jumlah_lagu' : playlist['jumlah_lagu'],
+            'durasi' : playlist['total_durasi'],
+            'tanggal_dibuat' : playlist['tanggal_dibuat'],
+            'id' : playlist['id_user_playlist'],
+        })
+    context = {
+        'playlists': res_playlist,
+        'navbar': get_navbar_info(request)        
+    }
+    return render(request, 'playlist/playlist_list.html', context)
 
-For more information on this file, see
-https://docs.djangoproject.com/en/4.2/howto/deployment/wsgi/
-"""
+@csrf_exempt
+def playlist_create(request):
+    user = get_session_info(request)
+    if not user:
+        return redirect('main:login')
+    if request.method == 'POST':
+        user = get_session_info(request)
+        email = user['email']
+        name = request.POST['judul']
+        description = request.POST['deskripsi']
+        new_id = str(uuid.uuid4())
+        playlist_id = str(uuid.uuid4())
+        current_date = datetime.now().strftime('%Y-%m-%d')
 
-import os
+        #inser playlist baru
+        query_string = f"""
+            INSERT INTO PLAYLIST (id)
+            VALUES ('{playlist_id}');
+        """
 
-from django.core.wsgi import get_wsgi_application
+        #insert user_playlist baru
+        query_string += f"""
+            INSERT INTO USER_PLAYLIST (email_pembuat, id_user_playlist, judul, deskripsi, jumlah_lagu, tanggal_dibuat, id_playlist, total_durasi)
+            VALUES ('{email}', '{new_id}', '{name}', '{description}', 0, '{current_date}', '{playlist_id}', 0);
+            """
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "marmut.settings")
+        res = query(query_string)
+        if res == 1:
+            return redirect('playlist_list')
+        
+        else:
+            print(res)
+            return HttpResponseNotFound('Failed to create playlist')
+    context = {'ubah': False, 'navbar': get_navbar_info(request)}
+    return render(request, 'playlist/playlist_form.html', context)
 
-application = get_wsgi_application()
+@csrf_exempt
+def playlist_detail(request, playlist_id):
+    user = get_session_info(request)
+    if not user:
+        return redirect('main:login')
+    id_user_playlist = playlist_id
+    query_string = f"""
+        SELECT *
+        FROM USER_PLAYLIST up
+        JOIN AKUN a ON up.email_pembuat = a.email
+        WHERE up.id_user_playlist = '{id_user_playlist}';        
+    """
+    playlist = query(query_string)[0]
+    print(playlist)
+    query_string = f"""
+        SELECT * FROM 
+        (SELECT * FROM SONG WHERE id_konten IN 
+            (SELECT id_song FROM PLAYLIST_SONG WHERE id_playlist = '{playlist['id_playlist']}')) AS LAGU
+        JOIN
+        (SELECT id, judul AS judul_lagu, tanggal_rilis, tahun, durasi FROM KONTEN) AS CONTENT
+        ON LAGU.id_konten = CONTENT.id
+        JOIN
+        (SELECT id AS artist_id, email_akun FROM ARTIST) AS ARTIST ON LAGU.id_artist = ARTIST.artist_id
+        JOIN
+        (SELECT email, nama FROM AKUN) AS AKUN ON ARTIST.email_akun = AKUN.email;
+    """
+    songs = query(query_string)
+    
+    songs_data = []
+    total_hours = playlist['total_durasi'] // 60
+    total_minutes = playlist['total_durasi'] % 60
+    for song in songs:
+        songs_data.append({
+            'title': song['judul_lagu'],
+            'artist': song['nama'],
+            'duration': song['durasi'],
+            'id_song': song['id_konten']
+        })
+    
+    playlist_data = {
+        'id': playlist['id_user_playlist'],
+        'title': playlist['judul'],
+        'creator': playlist['nama'],
+        'songs': songs_data,
+        'total_duration_hours': total_hours,
+        'total_duration_minutes': total_minutes,
+        'created_date': playlist['tanggal_dibuat'],
+        'description': playlist['deskripsi'],
 
+    }
+    context = {
+        'playlist': playlist_data,
+        'navbar': get_navbar_info(request)
+    }
+    return render(request, 'playlist/playlist_detail.html', context)
 
-
-marmut\__init__.py:
-
-
-
-connector\query.py:
-from collections import namedtuple
-import psycopg2
-from psycopg2 import Error
-from psycopg2.extras import RealDictCursor
-from django.http import HttpRequest  # for the 'request' parameter
-
-
-try:
-    connection = psycopg2.connect(user="postgres.tutzylpjrcjropovgoly",
-                        password="eqRvUiBE4LZlukUp",
-                        host="aws-0-ap-southeast-1.pooler.supabase.com",
-                        port="5432",
-                        database="postgres")
-
-    # Create a cursor to perform database operations
-    connection.autocommit = True
-    cursor = connection.cursor()
-except (Exception, Error) as error:
-    print("Error while connecting to PostgreSQL", error)
-
-
-def map_cursor(cursor):
-    "Return all rows from a cursor as a namedtuple"
-    desc = cursor.description
-    nt_result = namedtuple("Result", [col[0] for col in desc])
-    return [dict(row) for row in cursor.fetchall()]
-
-
-def query(query_str: str):
-    hasil = []
-    with connection.cursor(cursor_factory=RealDictCursor) as cursor:
-        cursor.execute("SET SEARCH_PATH TO PUBLIC")
-        try:
-            cursor.execute(query_str)
-
-            if query_str.strip().upper().startswith("SELECT"):
-                # Kalau ga error, return hasil SELECT
-                hasil = map_cursor(cursor)
-            else:
-                # Kalau ga error, return jumlah row yang termodifikasi oleh INSERT, UPDATE, DELETE
-                hasil = cursor.rowcount
-                connection.commit()
-        except Exception as e:
-            # Ga tau error apa
-            hasil = "error :\n" + str(e)
-
-    return hasil
-
-def get_session_info(request):
-    session_id = request.COOKIES.get('session_id')
-    if session_id:
-        user = query(f"SELECT * FROM SESSIONS WHERE session_id = '{session_id}'")
-        if user:
-            return user[0]
-    return None
-
-def get_navbar_info(request: HttpRequest):
-    session_info = get_session_info(request)
-
-    if session_info:
-        return {
-            'is_guest': False,
-            'is_user': not session_info['is_label'],
-            'is_artist': session_info['is_artist'],
-            'is_songwriter': session_info['is_songwriter']  ,
-            'is_podcaster': session_info['is_podcaster'],
-            'is_premium': session_info['is_premium'],
-            'is_label': session_info['is_label'],
-        }
+@csrf_exempt
+def remove_song_from_playlist(request, playlist_id, song_id):
+    user = get_session_info(request)
+    if not user:
+        return redirect('main:login')
+    query_string = f"""
+        DELETE FROM PLAYLIST_SONG
+        WHERE id_playlist = 
+        (SELECT id_playlist FROM USER_PLAYLIST WHERE id_user_playlist = '{playlist_id}')  AND id_song = '{song_id}';
+    """
+    res = query(query_string)
+    print(res)
+    print(query_string)
+    if res == 1:
+        return redirect('playlist_detail', playlist_id=playlist_id)
     else:
-        return {
-            'is_guest': True,
-            'is_user': False,
-            'is_artist': False,
-            'is_songwriter': False,
-            'is_podcaster': False,
-            'is_premium': False,
-            'is_label': False,
-        }
+        return HttpResponseNotFound('Failed to remove song from playlist')
+    
+
+@csrf_exempt
+def add_song_to_playlist(request, playlist_id):
+    user = get_session_info(request)
+    if not user:
+        return redirect('main:login')
+    if request.method == 'POST':
+        user = get_session_info(request)
+        email = user['email']
+        song_id = request.POST['lagu']  # Changed to match the form field name
+
+        playlist_id_riil = query(f"""
+            SELECT id_playlist FROM USER_PLAYLIST WHERE id_user_playlist = '{playlist_id}';
+        """)[0]['id_playlist']
+        query_string = f"""
+            INSERT INTO PLAYLIST_SONG (id_playlist, id_song)
+            VALUES ('{playlist_id_riil}', '{song_id}');
+        """
+        
+        res = query(query_string)
+        if res == 1:
+            return redirect('playlist_detail', playlist_id=playlist_id)
+        else:
+            print(res)
+            return redirect('add_song_to_playlist', playlist_id=playlist_id)
+
+    all_songs = query(f"""
+        SELECT judul, nama, id_konten FROM SONG
+        JOIN KONTEN ON SONG.id_konten = KONTEN.id
+        JOIN ARTIST ON SONG.id_artist = ARTIST.id
+        JOIN AKUN ON ARTIST.email_akun = AKUN.email;
+    """)
+
+    songs_data = []
+    for song in all_songs:
+        songs_data.append({
+            'judul': song['judul'],
+            'artist': song['nama'],
+            'id': song['id_konten']
+        })
+
+    context = {
+        'songs': songs_data,
+        'id': playlist_id,  # Ensuring the correct context variable is passed
+        'navbar': get_navbar_info(request) # Added navbar info to context
+    }
+    return render(request, 'playlist/add_song_to_playlist.html', context)
+
+def playlist_update(request, playlist_id):
+    user = get_session_info(request)
+    if not user:
+        return redirect('main:login')
+    if request.method == 'POST':
+        user = get_session_info(request)
+        email = user['email']
+        name = request.POST['judul']
+        description = request.POST['deskripsi']
+
+        query_string = f"""
+            UPDATE USER_PLAYLIST
+            SET judul = '{name}', deskripsi = '{description}'
+            WHERE id_user_playlist = '{playlist_id}';
+        """
+
+        res = query(query_string)
+        if res == 1:
+            return redirect('playlist_list')
+        else:
+            return HttpResponseNotFound('Failed to update playlist')
+    context = {'ubah': True, 'id' : playlist_id  , 'navbar': get_navbar_info(request)}
+    return render(request, 'playlist/playlist_form.html', context)
+
+@csrf_exempt
+def playlist_delete(request, playlist_id):
+    user = get_session_info(request)
+    if not user:
+        return redirect('main:login')
+    user_playlist_id = playlist_id
+    playlist_id = query(f"""
+        SELECT id_playlist FROM USER_PLAYLIST WHERE id_user_playlist = '{user_playlist_id}';
+    """)
+
+    playlist_id = playlist_id[0]['id_playlist']
+    query_string = f"""
+        DELETE FROM PLAYLIST_SONG
+        WHERE id_playlist = '{playlist_id}';
+    """
+    query_string += f"""
+        DELETE FROM AKUN_PLAY_USER_PLAYLIST
+        WHERE id_user_playlist = '{user_playlist_id}';
+    """
+    query_string += f"""
+        DELETE FROM USER_PLAYLIST
+        WHERE id_user_playlist = '{user_playlist_id}';
+    """
+    query_string += f"""
+        DELETE FROM PLAYLIST
+        WHERE id = '{playlist_id}';
+    """
+
+
+    res = query(query_string)
+    if res == 1:
+        return redirect('playlist_list')
+    else:
+        print(res)
+        return HttpResponseNotFound('Failed to delete playlist')
+
+# def playlist_update(request, playlist_id):
+#     playlist = get_object_or_404(Playlist, id=playlist_id, user=request.user)
+#     if request.method == 'POST':
+#         form = PlaylistForm(request.POST, instance=playlist)
+#         if form.is_valid():
+#             form.save()
+#             return redirect('playlist_list')
+#     else:
+#         form = PlaylistForm(instance=playlist)
+#     return render(request, 'playlist/playlist_form.html', {'form': form})
+
+# def playlist_delete(request, playlist_id):
+#     playlist = get_object_or_404(Playlist, id=playlist_id, user=request.user)
+#     playlist.delete()
+#     return redirect('playlist_list')
+
+# def add_song_to_playlist(request, playlist_id):
+#     playlist = get_object_or_404(Playlist, id=playlist_id, user=request.user)
+#     if request.method == 'POST':
+#         form = UserPlaylistForm(request.POST)
+#         if form.is_valid():
+#             user_playlist = form.save(commit=False)
+#             user_playlist.playlist = playlist
+#             user_playlist.save()
+#             return redirect('playlist_detail', playlist_id=playlist_id)
+#     else:
+#         form = UserPlaylistForm()
+#     return render(request, 'playlist/add_song_to_playlist.html', {'form': form, 'playlist': playlist})
+
+# def remove_song_from_playlist(request, playlist_id, song_id):
+#     playlist = get_object_or_404(Playlist, id=playlist_id, user=request.user)
+#     song = get_object_or_404(Song, id=song_id)
+#     UserPlaylist.objects.filter(playlist=playlist, song=song).delete()
+#     return redirect('playlist_detail', playlist_id=playlist_id)
+
+# def search(request):
+#     query = request.GET.get('query')
+    
+#     if query:
+#         songs = Song.objects.filter(title__icontains=query)
+#         podcasts = podcast.objects.filter(title__icontains=query)
+#         user_playlists = UserPlaylist.objects.filter(title__icontains=query)
+        
+#         results = []
+#         for song in songs:
+#             results.append({
+#                 'type': 'SONG',
+#                 'title': song.title,
+#                 'by': song.artist,
+#                 'url': reverse('song_detail', args=[song.id])
+#             })
+#         for podcast in podcasts:
+#             results.append({
+#                 'type': 'PODCAST',
+#                 'title': podcast.title,
+#                 'by': podcast.podcaster,
+#                 'url': reverse('podcast_detail', args=[podcast.id])
+#             })
+#         for playlist in user_playlists:
+#             results.append({
+#                 'type': 'USER PLAYLIST',
+#                 'title': playlist.title,
+#                 'by': playlist.user.username,
+#                 'url': reverse('playlist_detail', args=[playlist.id])
+#             })
+#     else:
+#         results = []
+    
+#     context = {
+#         'query': query,
+#         'results': results
+#     }
+#     return render(request, 'main/search_results.html', context)
+
+
+playlist\__init__.py:
+
 
 
 main\admin.py:
@@ -804,11 +1379,13 @@ def login_user(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
-        user = query(f"SELECT email FROM AKUN WHERE email = '{email}' AND password = '{password}' UNION SELECT email FROM LABEL WHERE email = '{email}' AND password = '{password}'")
-        print(user)
+        user = query(f"SELECT email FROM AKUN WHERE email = '{email}' AND password = '{password}'")
+        
         if len(user) == 0:
             messages.error(request, 'Invalid email or password!')
         else:
+            query("CALL periksa_dan_ubah_status_langganan()")
+            
             is_artist = len(query(f"SELECT * FROM ARTIST WHERE email_akun = '{email}'")) != 0
             is_songwriter = len(query(f"SELECT * FROM SONGWRITER WHERE email_akun = '{email}'")) != 0
             is_podcaster = len(query(f"SELECT * FROM PODCASTER WHERE email = '{email}'")) != 0
@@ -825,9 +1402,10 @@ def login_user(request):
             response.set_cookie('session_id', session_id)
             return response
     context = {
-        'navbar' : get_navbar_info(request)
+        'navbar': get_navbar_info(request)
     }
     return render(request, 'login.html', context)
+
 @csrf_exempt
 def logout_user(request):
     session_id = request.COOKIES.get('session_id')
@@ -1235,6 +1813,7 @@ def dashboard(request):
         'navbar' : get_navbar_info(request),
     }
     return render(request, 'dashboard.html', context)
+
 
 
 main\__init__.py:

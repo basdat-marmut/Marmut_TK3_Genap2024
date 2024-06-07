@@ -109,17 +109,15 @@ def downloaded_songs(request):
     return render(request, 'song/downloaded_songs.html', {'downloaded_songs': downloaded_songs})
 
 
-
-
 def search(request):
     query = request.GET.get('query')
+    
+    results = []
     
     if query:
         songs = Song.objects.filter(title__icontains=query)
         podcasts = podcast.objects.filter(title__icontains=query)
-        user_playlists = UserPlaylist.objects.filter(title__icontains=query)
         
-        results = []
         for song in songs:
             results.append({
                 'type': 'SONG',
@@ -134,18 +132,16 @@ def search(request):
                 'by': podcast.podcaster,
                 'url': reverse('podcast_detail', args=[podcast.id])
             })
-        for playlist in user_playlists:
-            results.append({
-                'type': 'USER PLAYLIST',
-                'title': playlist.title,
-                'by': playlist.user.username,
-                'url': reverse('playlist_detail', args=[playlist.id])
-            })
-    else:
-        results = []
     
     context = {
         'query': query,
         'results': results
     }
     return render(request, 'main/search_results.html', context)
+
+
+
+
+
+
+

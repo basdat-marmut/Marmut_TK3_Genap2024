@@ -38,13 +38,11 @@ def write_to_txt(file_paths, output_file="codeToPrompt.txt"):
 
 # List of file paths including empty ones and directories
 file_paths = [
+    r"song",
     r"langganan",
-    r"marmut",
-    r"connector",
+    r"templates",
+    r"playlist",
     r"main",
-    r"",
-    r"",
-    r"",
     r"",
     r"",
     r"",
