@@ -1,3 +1,4 @@
+from multiprocessing import connection
 from django.shortcuts import render
 from django.http import HttpResponseNotFound, HttpResponseRedirect
 from django.urls import reverse
@@ -22,6 +23,8 @@ from connector.query import query, get_session_info, get_navbar_info
 import uuid
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+
+from distutils.util import execute
 
 
 @csrf_exempt
@@ -440,16 +443,176 @@ def seechart(request):
     return render(request, 'seechart.html')
 
 def daily(request):
-    return render(request, 'daily.html')
+    playlist_id_query = "SELECT id_playlist FROM CHART"
+    playlist_id_result = query(playlist_id_query)
+    playlist_id = playlist_id_result[2]['id_playlist'] if playlist_id_result else None
 
+    if playlist_id:
+        # Ambil data lagu dari tabel SONG untuk daftar lagu pada chart
+        songs_query = f"""
+            SELECT
+                k.judul,
+                a.nama,
+                k.tanggal_rilis,
+                s.total_play
+            FROM
+                PLAYLIST_SONG ps
+            JOIN
+                SONG s ON ps.id_song = s.id_konten
+            JOIN
+                KONTEN k ON s.id_konten = k.id
+            JOIN
+                ARTIST art ON s.id_artist = art.id
+            JOIN
+                AKUN a ON art.email_akun = a.email
+            WHERE
+                k.tanggal_rilis >= (CURRENT_DATE - INTERVAL '2 years')
+            ORDER BY
+                s.total_play DESC
+            LIMIT 20;
+        """
+        songs_result = query(songs_query)
+        songs = [(song['judul'], song['nama'], song['tanggal_rilis'], song['total_play']) for song in songs_result]
+
+    else:
+        songs = []
+
+    # Buat konteks dengan daftar lagu dan kirimkan ke template 'home.html'
+    context = {
+        'songs': songs
+    }
+
+    return render(request, 'daily.html', context)
 def weekly(request):
-    return render(request, 'weekly.html')
+
+
+    playlist_id_query = "SELECT id_playlist FROM CHART"
+    playlist_id_result = query(playlist_id_query)
+    playlist_id = playlist_id_result[2]['id_playlist'] if playlist_id_result else None
+
+    if playlist_id:
+        # Ambil data lagu dari tabel SONG untuk daftar lagu pada chart
+        songs_query = f"""
+            SELECT
+                k.judul,
+                a.nama,
+                k.tanggal_rilis,
+                s.total_play
+            FROM
+                PLAYLIST_SONG ps
+            JOIN
+                SONG s ON ps.id_song = s.id_konten
+            JOIN
+                KONTEN k ON s.id_konten = k.id
+            JOIN
+                ARTIST art ON s.id_artist = art.id
+            JOIN
+                AKUN a ON art.email_akun = a.email
+            WHERE
+                k.tanggal_rilis >= (CURRENT_DATE - INTERVAL '2 years')
+            ORDER BY
+                s.total_play DESC
+            LIMIT 20;
+        """
+        songs_result = query(songs_query)
+        songs = [(song['judul'], song['nama'], song['tanggal_rilis'], song['total_play']) for song in songs_result]
+
+    else:
+        songs = []
+
+    # Buat konteks dengan daftar lagu dan kirimkan ke template 'home.html'
+    context = {
+        'songs': songs
+    }
+
+    return render(request, 'weekly.html', context)
+
 
 def monthly(request):
-    return render(request, 'monthly.html')
+    playlist_id_query = "SELECT id_playlist FROM CHART"
+    playlist_id_result = query(playlist_id_query)
+    playlist_id = playlist_id_result[2]['id_playlist'] if playlist_id_result else None
+
+    if playlist_id:
+        # Ambil data lagu dari tabel SONG untuk daftar lagu pada chart
+        songs_query = f"""
+            SELECT
+                k.judul,
+                a.nama,
+                k.tanggal_rilis,
+                s.total_play
+            FROM
+                PLAYLIST_SONG ps
+            JOIN
+                SONG s ON ps.id_song = s.id_konten
+            JOIN
+                KONTEN k ON s.id_konten = k.id
+            JOIN
+                ARTIST art ON s.id_artist = art.id
+            JOIN
+                AKUN a ON art.email_akun = a.email
+            WHERE
+                k.tanggal_rilis >= (CURRENT_DATE - INTERVAL '8 years')
+            ORDER BY
+                s.total_play DESC
+            LIMIT 20;
+        """
+        songs_result = query(songs_query)
+        songs = [(song['judul'], song['nama'], song['tanggal_rilis'], song['total_play']) for song in songs_result]
+
+    else:
+        songs = []
+
+    # Buat konteks dengan daftar lagu dan kirimkan ke template 'home.html'
+    context = {
+        'songs': songs
+    }
+
+    return render(request, 'monthly.html', context)
+
+
 
 def yearly(request):
-    return render(request, 'yearly.html')
+    playlist_id_query = "SELECT id_playlist FROM CHART"
+    playlist_id_result = query(playlist_id_query)
+    playlist_id = playlist_id_result[2]['id_playlist'] if playlist_id_result else None
+
+    if playlist_id:
+        # Ambil data lagu dari tabel SONG untuk daftar lagu pada chart
+        songs_query = f"""
+            SELECT
+                k.judul,
+                a.nama,
+                k.tanggal_rilis,
+                s.total_play
+            FROM
+                PLAYLIST_SONG ps
+            JOIN
+                SONG s ON ps.id_song = s.id_konten
+            JOIN
+                KONTEN k ON s.id_konten = k.id
+            JOIN
+                ARTIST art ON s.id_artist = art.id
+            JOIN
+                AKUN a ON art.email_akun = a.email
+            WHERE
+                k.tanggal_rilis >= (CURRENT_DATE - INTERVAL '35 years')
+            ORDER BY
+                s.total_play DESC
+            LIMIT 20;
+        """
+        songs_result = query(songs_query)
+        songs = [(song['judul'], song['nama'], song['tanggal_rilis'], song['total_play']) for song in songs_result]
+
+    else:
+        songs = []
+
+    # Buat konteks dengan daftar lagu dan kirimkan ke template 'home.html'
+    context = {
+        'songs': songs
+    }
+
+    return render(request, 'yearly.html', context)
 
 
 def podetail(request):
@@ -545,3 +708,165 @@ def dashboard(request):
         'navbar': get_navbar_info(request),
     }
     return render(request, 'dashboard.html', context)
+
+
+def song_detail(request, song_judul):
+    song_query = """
+        SELECT
+            k.judul,
+            a.nama,
+            k.tanggal_rilis,
+            s.total_play
+        FROM
+            KONTEN k
+        JOIN
+            SONG s ON k.id = s.id_konten
+        JOIN
+            ARTIST art ON s.id_artist = art.id
+        JOIN
+            AKUN a ON art.email_akun = a.email
+        WHERE
+            k.judul = '{}';
+    """.format(song_judul)
+
+    song_result = query(song_query) 
+    
+    if song_result:
+        song = {
+            'judul': song_result[0]['judul'],
+            'nama': song_result[0]['nama'],
+            'tanggal_rilis': song_result[0]['tanggal_rilis'],
+            'total_play': song_result[0]['total_play'],
+        }
+    else:
+        song = None
+
+    context = {
+        'song': song,
+        'error': 'Song not found' if not song else None,
+    }
+    return render(request, 'song_detail.html', context)
+
+
+
+
+
+def podcastdetail(request):
+
+    podcast_query = "SELECT * FROM PODCAST"
+    podcast_result = query(podcast_query)
+    podcasts = podcast_result
+
+
+    for podcast in podcasts:
+     
+        podcaster_query = f"""
+        SELECT PODCASTER.email, AKUN.nama 
+        FROM PODCASTER 
+        JOIN AKUN ON PODCASTER.email = AKUN.email 
+        WHERE PODCASTER.email = '{podcast['email_podcaster']}'
+        """
+        podcaster_result = query(podcaster_query)
+        podcast['podcaster'] = podcaster_result[0] if podcaster_result else None
+
+
+        episodes_query = f"SELECT * FROM EPISODE WHERE id_konten_podcast = '{podcast['id_konten']}'"
+        episodes_result = query(episodes_query)
+        podcast['episodes'] = episodes_result
+
+
+        genres_query = f"SELECT genre FROM GENRE WHERE id_konten = '{podcast['id_konten']}'"
+        genres_result = query(genres_query)
+        podcast['genres'] = [genre['genre'] for genre in genres_result]
+
+
+        total_duration_minutes = sum(episode['durasi'] for episode in podcast['episodes'])
+        podcast['total_duration_hours'] = total_duration_minutes // 60
+        podcast['remaining_minutes'] = total_duration_minutes % 60
+
+        if podcast['episodes']:
+            earliest_release_date = min(episode['tanggal_rilis'] for episode in podcast['episodes'])
+            podcast['earliest_release_date'] = earliest_release_date
+            podcast['year'] = earliest_release_date.year
+
+    context = {
+        'podcasts': podcasts,
+    }
+
+    return render(request, 'podcastdetail.html', context)
+
+
+
+
+
+def kelolapodcast(request):
+    podcast_query = """
+        SELECT PODCAST.id_KONTEN, KONTEN.judul AS podcast_judul
+        FROM PODCAST
+        JOIN KONTEN ON PODCAST.id_konten = KONTEN.id
+    """
+    podcasts = query(podcast_query)
+
+
+    podcast_list = []
+
+ 
+    for podcast in podcasts:
+        # Query to fetch episode count and total duration of each podcast
+        episode_info_query = f"""
+            SELECT COUNT(*) AS episode_count, SUM(durasi) AS total_duration 
+            FROM EPISODE 
+            WHERE id_konten_podcast = '{podcast['id_konten']}'
+        """
+        episode_info_result = query(episode_info_query)
+        
+      
+        episode_count = episode_info_result[0]['episode_count'] if episode_info_result else 0
+        total_duration = episode_info_result[0]['total_duration'] if episode_info_result else 0
+
+     
+        podcast_list.append({
+            'judul': podcast['podcast_judul'], 
+            'jumlah_episode': episode_count,
+            'total_durasi': f"{total_duration} menit",
+            'aksi': f"[Lihat Daftar Episode] [Tambah Episode] [Hapus]"
+        })
+
+    return render(request, 'createpod.html', {'podcasts': podcast_list})
+
+
+
+def addEpisode(request):
+    podcast_id = request.GET.get('podcast_id', '')
+    if request.method == 'POST':
+        # Handle form submission for adding an episode
+        judul = request.POST.get('judul')
+        deskripsi = request.POST.get('deskripsi')
+        durasi = request.POST.get('durasi')
+        # Get current timestamp as release date
+        tanggal_rilis = datetime.timezone.now().strftime("%Y-%m-%d %H:%M:%S")
+        execute(f"""
+            INSERT INTO EPISODE (id_konten_podcast, judul, deskripsi, durasi, tanggal_rilis) 
+            VALUES ('{podcast_id}', '{judul}', '{deskripsi}', '{durasi}', '{tanggal_rilis}')
+        """)
+        return redirect('main:createpodepisode', podcast_id=podcast_id)
+
+    return render(request, 'createpod_episode.html', {'podcast_id': podcast_id})
+
+
+
+def deletePodcast(request):
+    if request.method == 'POST':
+        podcast_id = request.POST.get('podcast_id')
+        if podcast_id:
+            with connection.cursor() as cursor:
+                # Fetch the id and judul from the KONTEN table using the podcast_id
+                cursor.execute("SELECT id, judul FROM KONTEN WHERE id = %s", [podcast_id])
+                konten = cursor.fetchone()
+
+                if konten:
+                    podcast_id, judul = konten
+                    # Delete the podcast from the PODCAST table using the id_konten
+                    cursor.execute("DELETE FROM PODCAST WHERE id_konten = %s", [podcast_id])
+                    return JsonResponse({'success': True, 'judul': judul}) # type: ignore
+    return JsonResponse({'success': False}) # type: ignore
